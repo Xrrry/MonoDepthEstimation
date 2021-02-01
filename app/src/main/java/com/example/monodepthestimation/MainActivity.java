@@ -2,9 +2,15 @@ package com.example.monodepthestimation;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
+import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CameraManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 
@@ -13,6 +19,9 @@ import java.lang.reflect.Method;
 
 public class MainActivity extends AppCompatActivity {
 
+    private int mCameraId = CameraCharacteristics.LENS_FACING_FRONT; // 要打开的摄像头ID
+    private CameraManager mCameraManager; // 相机管理者
+    private CameraCharacteristics mCameraCharacteristics; // 相机属性
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,5 +50,42 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         setContentView(R.layout.activity_main);
+        findViewById(R.id.button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, CameraV.class);
+//                startActivity(intent);
+                try {
+                    mCameraManager=(CameraManager)getSystemService(Context.CAMERA_SERVICE);
+                    mCameraCharacteristics = mCameraManager.getCameraCharacteristics(Integer.toString(mCameraId));
+                } catch (CameraAccessException e) {
+                    e.printStackTrace();
+                }
+                isHardwareSupported(mCameraCharacteristics);
+            }
+        });
+
+    }
+    private int isHardwareSupported(CameraCharacteristics characteristics) {
+        Integer deviceLevel = characteristics.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL);
+        if (deviceLevel == null) {
+            System.out.println("----can not get INFO_SUPPORTED_HARDWARE_LEVEL");
+            return -1;
+        }
+        switch (deviceLevel) {
+            case CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_FULL:
+                System.out.println("----hardware supported level:LEVEL_FULL");
+                break;
+            case CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY:
+                System.out.println("----hardware supported level:LEVEL_LEGACY");
+                break;
+            case CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_3:
+                System.out.println("----hardware supported level:LEVEL_3");
+                break;
+            case CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED:
+                System.out.println("----hardware supported level:LEVEL_LIMITED");
+                break;
+        }
+        return deviceLevel;
     }
 }
