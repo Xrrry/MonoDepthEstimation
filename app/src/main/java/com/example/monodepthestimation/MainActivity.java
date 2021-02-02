@@ -53,8 +53,13 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, CameraV.class);
-//                startActivity(intent);
+                Intent intent = new Intent(MainActivity.this, Home.class);
+                startActivity(intent);
+            }
+        });
+        findViewById(R.id.detect).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
                 try {
                     mCameraManager=(CameraManager)getSystemService(Context.CAMERA_SERVICE);
                     mCameraCharacteristics = mCameraManager.getCameraCharacteristics(Integer.toString(mCameraId));
@@ -64,7 +69,13 @@ public class MainActivity extends AppCompatActivity {
                 isHardwareSupported(mCameraCharacteristics);
             }
         });
-
+        findViewById(R.id.camera).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, MainMenu.class);
+                startActivity(intent);
+            }
+        });
     }
     private int isHardwareSupported(CameraCharacteristics characteristics) {
         Integer deviceLevel = characteristics.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL);

@@ -101,4 +101,5 @@ public class CameraV extends AppCompatActivity {
         super.onDestroy();
         camera.destroy();
     }
+
 }
