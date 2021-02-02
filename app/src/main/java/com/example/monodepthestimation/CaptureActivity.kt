@@ -25,8 +25,7 @@ import java.io.File
  */
 class CaptureActivity : AppCompatActivity() {
     companion object {
-        const val AUTHORITY = "com.example.monodepthestimation.camera.fileProvider"
-
+        const val AUTHORITY = "com.example.monodepthestimation.fileProvider"
         const val REQUEST_CODE_CAPTURE_SMALL = 1
         const val REQUEST_CODE_CAPTURE_RAW = 2
         const val REQUEST_CODE_CAPTURE = 3

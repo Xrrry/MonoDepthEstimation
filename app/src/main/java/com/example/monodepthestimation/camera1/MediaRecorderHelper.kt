@@ -2,11 +2,13 @@ package com.example.monodepthestimation.camera1
 
 import android.app.Activity
 import android.hardware.Camera
+import android.media.CamcorderProfile
 import android.media.MediaRecorder
 import android.util.Log
 import android.view.Surface
 import android.widget.Toast
 import com.example.monodepthestimation.util.FileUtil
+
 
 /**
  *
@@ -29,10 +31,12 @@ class MediaRecorderHelper(var mContext: Activity, private var mCamera: Camera, p
                 it.setOrientationHint(rotation)  //改变保存后的视频文件播放时是否横屏(不加这句，视频文件播放的时候角度是反的)
                 it.setAudioSource(MediaRecorder.AudioSource.MIC)      //设置从麦克风采集声音
                 it.setVideoSource(MediaRecorder.VideoSource.CAMERA)   //设置从摄像头采集图像
-                it.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4) //设置视频的输出格式为MP4
-                it.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT) //设置音频的编码格式
-                it.setVideoEncoder(MediaRecorder.VideoEncoder.DEFAULT) // 设置视频的编码格式
-                it.setVideoSize(3840, 2160)// 设置视频大小
+//                it.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4) //设置视频的输出格式为MP4
+//                it.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT) //设置音频的编码格式
+//                it.setVideoEncoder(MediaRecorder.VideoEncoder.MPEG_4_SP) // 设置视频的编码格式
+//                it.setVideoSize(3840, 2160)// 设置视频大小
+                val cProfile = CamcorderProfile.get(CamcorderProfile.QUALITY_1080P)
+                it.setProfile(cProfile)
                 it.setVideoFrameRate(60)  // 设置帧率
                 //it.setMaxDuration(10000) //设置最大录像时间为10s
                 it.setPreviewDisplay(surface) //设置

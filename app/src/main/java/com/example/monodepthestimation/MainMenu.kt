@@ -16,7 +16,8 @@ import kotlinx.android.synthetic.main.activity_main_menu.*
 class MainMenu : AppCompatActivity() {
 
     private val permissionsList = arrayOf(Manifest.permission.READ_PHONE_STATE,
-            Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO)
+            Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE)
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
