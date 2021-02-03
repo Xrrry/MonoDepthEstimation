@@ -21,11 +21,12 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:requestLegacyExternalStorage="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        tools:ignore="GoogleAppIndexingWarning"
-        android:requestLegacyExternalStorage="true">
+        tools:ignore="GoogleAppIndexingWarning">
+        <activity android:name=".Orientation" />
         <activity android:name=".GoogleCamera" />
         <activity android:name=".CameraV" />
         <activity android:name=".Home" />
@@ -41,6 +42,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.example.monodepthestimation.fileProvider"

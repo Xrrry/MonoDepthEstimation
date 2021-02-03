@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -12,6 +13,7 @@ import androidx.core.content.FileProvider
 import androidx.appcompat.app.AppCompatActivity
 import android.util.Log
 import android.view.View
+import android.view.Window
 import com.example.monodepthestimation.util.DecodeImgTask
 import com.example.monodepthestimation.util.FileUtil
 import kotlinx.android.synthetic.main.activity_capture.*
@@ -40,6 +42,28 @@ class CaptureActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // 隐藏标题栏
+        supportRequestWindowFeature(Window.FEATURE_NO_TITLE)
+        // 隐藏状态栏
+        window.statusBarColor = Color.TRANSPARENT
+        // 设置状态栏字体颜色 黑色
+        val window = window
+        if (window != null) {
+            val clazz: Class<*> = window.javaClass
+            try {
+                var darkModeFlag = 0
+                val layoutParams = Class.forName("android.view.MiuiWindowManager\$LayoutParams")
+                val field = layoutParams.getField("EXTRA_FLAG_STATUS_BAR_DARK_MODE")
+                darkModeFlag = field.getInt(layoutParams)
+                val extraFlagField = clazz.getMethod("setExtraFlags", Int::class.javaPrimitiveType, Int::class.javaPrimitiveType)
+                extraFlagField.invoke(window, darkModeFlag, darkModeFlag) //状态栏透明且黑色字体
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    //开发版 7.7.13 及以后版本采用了系统API，旧方法无效但不会报错，所以两个方式都要加上
+                    getWindow().decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                }
+            } catch (e: Exception) {
+            }
+        }
         setContentView(R.layout.activity_capture)
 
         btnCaptureSmall.setOnClickListener { gotoCaptureSmall() }    //拍照(返回缩略图)

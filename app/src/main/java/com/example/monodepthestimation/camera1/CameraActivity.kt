@@ -1,11 +1,16 @@
 package com.example.monodepthestimation.camera1
 
+import android.content.pm.ActivityInfo
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.graphics.RectF
 import android.hardware.Camera
+import android.os.Build
 import android.os.Bundle
+import android.os.Handler
 import androidx.appcompat.app.AppCompatActivity
 import android.view.View
+import android.view.Window
 import android.view.WindowManager
 import com.example.monodepthestimation.R
 import com.example.monodepthestimation.log
@@ -16,7 +21,10 @@ import kotlinx.android.synthetic.main.activity_camera.*
 import okio.Okio
 import okio.buffer
 import okio.sink
+import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.concurrent.thread
+import kotlin.concurrent.timerTask
 
 /**
  * author :  chensen
@@ -31,12 +39,35 @@ class CameraActivity : AppCompatActivity() {
     }
 
     var lock = false //控制MediaRecorderHelper的初始化
-
+    var h = Helper()
     private lateinit var mCameraHelper: CameraHelper
     private var mMediaRecorderHelper: MediaRecorderHelper? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+        // 隐藏标题栏
+        supportRequestWindowFeature(Window.FEATURE_NO_TITLE)
+        // 隐藏状态栏
+        window.statusBarColor = Color.TRANSPARENT
+        // 设置状态栏字体颜色 黑色
+        val window = window
+        if (window != null) {
+            val clazz: Class<*> = window.javaClass
+            try {
+                var darkModeFlag = 0
+                val layoutParams = Class.forName("android.view.MiuiWindowManager\$LayoutParams")
+                val field = layoutParams.getField("EXTRA_FLAG_STATUS_BAR_DARK_MODE")
+                darkModeFlag = field.getInt(layoutParams)
+                val extraFlagField = clazz.getMethod("setExtraFlags", Int::class.javaPrimitiveType, Int::class.javaPrimitiveType)
+                extraFlagField.invoke(window, darkModeFlag, darkModeFlag) //状态栏透明且黑色字体
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    //开发版 7.7.13 及以后版本采用了系统API，旧方法无效但不会报错，所以两个方式都要加上
+                    getWindow().decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                }
+            } catch (e: Exception) {
+            }
+        }
         setContentView(R.layout.activity_camera)
         window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
 
@@ -66,7 +97,11 @@ class CameraActivity : AppCompatActivity() {
             btnStart.visibility = View.VISIBLE
         }
 
-        btnTakePic.setOnClickListener { mCameraHelper.takePic() }
+        btnTakePic.setOnClickListener {
+//            mCameraHelper.takePic()
+            val timer = Timer()
+            timer.schedule(timerTask { mCameraHelper.takePic() }, 0,500)
+        }
         ivExchange.setOnClickListener { mCameraHelper.exchangeCamera() }
         btnStart.setOnClickListener {
             ivExchange.isClickable = false
@@ -82,7 +117,8 @@ class CameraActivity : AppCompatActivity() {
         }
     }
 
-    private fun savePic(data: ByteArray?) {
+
+    fun savePic(data: ByteArray?) {
         thread {
             try {
                 val temp = System.currentTimeMillis()
@@ -92,9 +128,9 @@ class CameraActivity : AppCompatActivity() {
                     val resultBitmap = if (mCameraHelper.mCameraFacing == Camera.CameraInfo.CAMERA_FACING_FRONT)
                         BitmapUtils.mirror(BitmapUtils.rotate(rawBitmap, 270f))
                     else
-                        BitmapUtils.rotate(rawBitmap, 90f)
-
+                        BitmapUtils.rotate(rawBitmap, 0f)
                     picFile.sink().buffer().write(BitmapUtils.toByteArray(resultBitmap)).close()
+                    h.helperTest(data, changeTest)
                     runOnUiThread {
                         toast("图片已保存! ${picFile.absolutePath}")
                         log("图片已保存! 耗时：${System.currentTimeMillis() - temp}    路径：  ${picFile.absolutePath}")

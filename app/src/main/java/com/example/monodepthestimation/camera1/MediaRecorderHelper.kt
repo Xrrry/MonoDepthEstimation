@@ -6,6 +6,7 @@ import android.media.CamcorderProfile
 import android.media.MediaRecorder
 import android.util.Log
 import android.view.Surface
+import android.view.SurfaceHolder
 import android.widget.Toast
 import com.example.monodepthestimation.util.FileUtil
 

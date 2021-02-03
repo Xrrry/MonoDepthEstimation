@@ -3,14 +3,16 @@ package com.example.monodepthestimation
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
+import android.view.View
+import android.view.Window
 import androidx.appcompat.app.AppCompatActivity
 import com.example.monodepthestimation.camera1.CameraActivity
 import com.example.monodepthestimation.util.PermissionUtils
 import com.example.monodepthestimation.util.PermissionUtils.PERMISSION_REQUEST_CODE
 import com.example.monodepthestimation.util.PermissionUtils.PERMISSION_SETTING_CODE
-import com.example.monodepthestimation.R
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_main_menu.*
 
 class MainMenu : AppCompatActivity() {
@@ -22,6 +24,28 @@ class MainMenu : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // 隐藏标题栏
+        supportRequestWindowFeature(Window.FEATURE_NO_TITLE)
+        // 隐藏状态栏
+        window.statusBarColor = Color.TRANSPARENT
+        // 设置状态栏字体颜色 黑色
+        val window = window
+        if (window != null) {
+            val clazz: Class<*> = window.javaClass
+            try {
+                var darkModeFlag = 0
+                val layoutParams = Class.forName("android.view.MiuiWindowManager\$LayoutParams")
+                val field = layoutParams.getField("EXTRA_FLAG_STATUS_BAR_DARK_MODE")
+                darkModeFlag = field.getInt(layoutParams)
+                val extraFlagField = clazz.getMethod("setExtraFlags", Int::class.javaPrimitiveType, Int::class.javaPrimitiveType)
+                extraFlagField.invoke(window, darkModeFlag, darkModeFlag) //状态栏透明且黑色字体
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    //开发版 7.7.13 及以后版本采用了系统API，旧方法无效但不会报错，所以两个方式都要加上
+                    getWindow().decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                }
+            } catch (e: Exception) {
+            }
+        }
         setContentView(R.layout.activity_main_menu)
 
         btCapture.setOnClickListener {

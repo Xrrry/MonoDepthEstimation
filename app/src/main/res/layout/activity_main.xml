@@ -11,14 +11,14 @@
         android:layout_height="wrap_content"
         android:text="Hello World!"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="100dp"/>
+        android:layout_marginTop="50dp"/>
     <Button
         android:id="@+id/button"
         android:layout_width="200dp"
         android:layout_height="80dp"
         android:text="CameraView"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="200dp"/>
+        android:layout_marginTop="100dp"/>
 
     <Button
         android:id="@+id/detect"
@@ -26,13 +26,19 @@
         android:layout_height="80dp"
         android:text="Detect"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="300dp"/>
+        android:layout_marginTop="200dp"/>
     <Button
         android:id="@+id/camera"
         android:layout_width="200dp"
         android:layout_height="80dp"
         android:text="camera"
         android:layout_centerHorizontal="true"
+        android:layout_marginTop="300dp"/>
+    <Button
+        android:id="@+id/ori"
+        android:layout_width="200dp"
+        android:layout_height="80dp"
+        android:text="orientation"
+        android:layout_centerHorizontal="true"
         android:layout_marginTop="400dp"/>
-
 </RelativeLayout>

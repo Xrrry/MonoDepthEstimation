@@ -29,8 +29,8 @@ class CameraHelper(activity: Activity, surfaceView: SurfaceView) : Camera.Previe
     var mCameraFacing = Camera.CameraInfo.CAMERA_FACING_BACK  //摄像头方向
     var mDisplayOrientation: Int = 0    //预览旋转的角度
 
-    private var picWidth = 2160        //保存图片的宽
-    private var picHeight = 3840       //保存图片的高
+    private var picWidth = 1080        //保存图片的宽
+    private var picHeight = 1920       //保存图片的高
 
     override fun onPreviewFrame(data: ByteArray?, camera: Camera?) {
         mCallBack?.onPreviewFrame(data)
@@ -196,6 +196,7 @@ class CameraHelper(activity: Activity, surfaceView: SurfaceView) : Camera.Previe
         val info = Camera.CameraInfo()
         Camera.getCameraInfo(mCameraFacing, info)
         val rotation = activity.windowManager.defaultDisplay.rotation
+//        val rotation = Surface.ROTATION_90
 
         var screenDegree = 0
         when (rotation) {
