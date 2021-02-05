@@ -7,24 +7,21 @@ import android.graphics.RectF
 import android.hardware.Camera
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import androidx.appcompat.app.AppCompatActivity
+import android.util.DisplayMetrics
 import android.view.View
 import android.view.Window
 import android.view.WindowManager
+import androidx.appcompat.app.AppCompatActivity
 import com.example.monodepthestimation.R
 import com.example.monodepthestimation.log
 import com.example.monodepthestimation.toast
 import com.example.monodepthestimation.util.BitmapUtils
 import com.example.monodepthestimation.util.FileUtil
 import kotlinx.android.synthetic.main.activity_camera.*
-import okio.Okio
 import okio.buffer
 import okio.sink
-import java.util.*
-import kotlin.collections.ArrayList
 import kotlin.concurrent.thread
-import kotlin.concurrent.timerTask
+
 
 /**
  * author :  chensen
@@ -38,8 +35,7 @@ class CameraActivity : AppCompatActivity() {
         const val TYPE_RECORD = 1
     }
 
-    var lock = false //控制MediaRecorderHelper的初始化
-    var h = Helper()
+//    var lock = false //控制MediaRecorderHelper的初始化
     private lateinit var mCameraHelper: CameraHelper
     private var mMediaRecorderHelper: MediaRecorderHelper? = null
 
@@ -71,50 +67,57 @@ class CameraActivity : AppCompatActivity() {
         setContentView(R.layout.activity_camera)
         window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
 
-        mCameraHelper = CameraHelper(this, surfaceView)
+        mCameraHelper = CameraHelper(this, surfaceView, imageView)
         mCameraHelper.addCallBack(object : CameraHelper.CallBack {
-            override fun onFaceDetect(faces: ArrayList<RectF>) {
-                faceView.setFaces(faces)
-            }
+//            override fun onFaceDetect(faces: ArrayList<RectF>) {
+//                faceView.setFaces(faces)
+//            }
 
             override fun onTakePic(data: ByteArray?) {
                 savePic(data)
                 btnTakePic.isClickable = true
             }
 
-            override fun onPreviewFrame(data: ByteArray?) {
-                if (!lock) {
-                    mCameraHelper.getCamera()?.let {
-                        mMediaRecorderHelper = MediaRecorderHelper(this@CameraActivity, mCameraHelper.getCamera()!!, mCameraHelper.mDisplayOrientation, mCameraHelper.mSurfaceHolder.surface)
-                    }
-                    lock = true
-                }
-            }
+//            override fun onPreviewFrame(data: ByteArray?) {
+//                if (!lock) {
+//                    mCameraHelper.getCamera()?.let {
+//                        mMediaRecorderHelper = MediaRecorderHelper(this@CameraActivity, mCameraHelper.getCamera()!!, mCameraHelper.mDisplayOrientation, mCameraHelper.mSurfaceHolder.surface)
+//                    }
+//                    lock = true
+//                }
+//            }
         })
-
+        val dm = DisplayMetrics()
+        windowManager.defaultDisplay.getMetrics(dm)
+        val screenHeight = dm.heightPixels / 2
+        val screenWidth = (screenHeight/4*3)
+        surfaceView.layoutParams.height = screenHeight
+        imageView.layoutParams.height = screenHeight
+        surfaceView.layoutParams.width = screenWidth
+        imageView.layoutParams.width = screenWidth
         if (intent.getIntExtra(TYPE_TAG, 0) == TYPE_RECORD) { //录视频
             btnTakePic.visibility = View.GONE
             btnStart.visibility = View.VISIBLE
         }
 
         btnTakePic.setOnClickListener {
-//            mCameraHelper.takePic()
-            val timer = Timer()
-            timer.schedule(timerTask { mCameraHelper.takePic() }, 0,500)
+            mCameraHelper.takePic()
+//            val timer = Timer()
+//            timer.schedule(timerTask { mCameraHelper.takePic() }, 0,1000)
         }
         ivExchange.setOnClickListener { mCameraHelper.exchangeCamera() }
-        btnStart.setOnClickListener {
-            ivExchange.isClickable = false
-            btnStart.visibility = View.GONE
-            btnStop.visibility = View.VISIBLE
-            mMediaRecorderHelper?.startRecord()
-        }
-        btnStop.setOnClickListener {
-            btnStart.visibility = View.VISIBLE
-            btnStop.visibility = View.GONE
-            ivExchange.isClickable = true
-            mMediaRecorderHelper?.stopRecord()
-        }
+//        btnStart.setOnClickListener {
+//            ivExchange.isClickable = false
+//            btnStart.visibility = View.GONE
+//            btnStop.visibility = View.VISIBLE
+//            mMediaRecorderHelper?.startRecord()
+//        }
+//        btnStop.setOnClickListener {
+//            btnStart.visibility = View.VISIBLE
+//            btnStop.visibility = View.GONE
+//            ivExchange.isClickable = true
+//            mMediaRecorderHelper?.stopRecord()
+//        }
     }
 
 
@@ -130,7 +133,6 @@ class CameraActivity : AppCompatActivity() {
                     else
                         BitmapUtils.rotate(rawBitmap, 0f)
                     picFile.sink().buffer().write(BitmapUtils.toByteArray(resultBitmap)).close()
-                    h.helperTest(data, changeTest)
                     runOnUiThread {
                         toast("图片已保存! ${picFile.absolutePath}")
                         log("图片已保存! 耗时：${System.currentTimeMillis() - temp}    路径：  ${picFile.absolutePath}")

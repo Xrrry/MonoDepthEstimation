@@ -33,7 +33,7 @@
         <activity android:name=".CameraResult" />
         <activity android:name=".Customcamera" />
         <activity android:name=".MainMenu" />
-        <activity android:name=".camera1.CameraActivity" />
+        <activity android:name=".camera1.CameraActivity"/>
         <activity android:name=".CaptureActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>

@@ -1,27 +1,31 @@
 package com.example.monodepthestimation.camera1
 
 import android.app.Activity
-import android.graphics.ImageFormat
-import android.graphics.Matrix
-import android.graphics.RectF
+import android.graphics.*
 import android.hardware.Camera
+import android.util.Log
 import android.view.Surface
 import android.view.SurfaceHolder
 import android.view.SurfaceView
+import android.widget.ImageView
 import android.widget.Toast
 import com.example.monodepthestimation.log
+import java.io.ByteArrayOutputStream
 
 /**
  * author :  chensen
  * data  :  2018/3/17
  * desc :
  */
-class CameraHelper(activity: Activity, surfaceView: SurfaceView) : Camera.PreviewCallback {
+//: Camera.PreviewCallback
+class CameraHelper(activity: Activity, surfaceView: SurfaceView, imageView: ImageView) {
 
     private var mCamera: Camera? = null                   //Camera对象
     private lateinit var mParameters: Camera.Parameters   //Camera对象的参数
     private var mSurfaceView: SurfaceView = surfaceView   //用于预览的SurfaceView对象
+    private var mimageView: ImageView = imageView
     var mSurfaceHolder: SurfaceHolder                     //SurfaceHolder对象
+
 
     private var mActivity: Activity = activity
     private var mCallBack: CallBack? = null   //自定义的回调
@@ -29,12 +33,12 @@ class CameraHelper(activity: Activity, surfaceView: SurfaceView) : Camera.Previe
     var mCameraFacing = Camera.CameraInfo.CAMERA_FACING_BACK  //摄像头方向
     var mDisplayOrientation: Int = 0    //预览旋转的角度
 
-    private var picWidth = 1080        //保存图片的宽
+    private var picWidth = 1440        //保存图片的宽
     private var picHeight = 1920       //保存图片的高
 
-    override fun onPreviewFrame(data: ByteArray?, camera: Camera?) {
-        mCallBack?.onPreviewFrame(data)
-    }
+//    override fun onPreviewFrame(data: ByteArray?, camera: Camera?) {
+//        mCallBack?.onPreviewFrame(data)
+//    }
 
     fun takePic() {
         mCamera?.let {
@@ -63,6 +67,7 @@ class CameraHelper(activity: Activity, surfaceView: SurfaceView) : Camera.Previe
         })
     }
 
+
     //打开相机
     private fun openCamera(cameraFacing: Int = Camera.CameraInfo.CAMERA_FACING_BACK): Boolean {
         val supportCameraFacing = supportCameraFacing(cameraFacing)
@@ -70,7 +75,7 @@ class CameraHelper(activity: Activity, surfaceView: SurfaceView) : Camera.Previe
             try {
                 mCamera = Camera.open(cameraFacing)
                 initParameters(mCamera!!)
-                mCamera?.setPreviewCallback(this)
+//                mCamera?.setPreviewCallback(this)
             } catch (e: Exception) {
                 e.printStackTrace()
                 toast("打开相机失败!")
@@ -108,24 +113,53 @@ class CameraHelper(activity: Activity, surfaceView: SurfaceView) : Camera.Previe
         }
     }
 
+
     //开始预览
     fun startPreview() {
         mCamera?.let {
             it.setPreviewDisplay(mSurfaceHolder)
             setCameraDisplayOrientation(mActivity)
             it.startPreview()
-            startFaceDetect()
+//            startFaceDetect()
+            startGetPreviewImage()
         }
     }
 
-    private fun startFaceDetect() {
-        mCamera?.let {
-            it.startFaceDetection()
-            it.setFaceDetectionListener { faces, _ ->
-                mCallBack?.onFaceDetect(transForm(faces))
-                log("检测到 ${faces.size} 张人脸")
+//    private fun startFaceDetect() {
+//        mCamera?.let {
+//            it.startFaceDetection()
+//            it.setFaceDetectionListener { faces, _ ->
+//                mCallBack?.onFaceDetect(transForm(faces))
+//                log("检测到 ${faces.size} 张人脸")
+//            }
+//        }
+//    }
+
+    private fun startGetPreviewImage() {
+        mCamera!!.setPreviewCallback { data, camera ->
+            val size = camera.parameters.previewSize
+            try {
+                val image = YuvImage(data, ImageFormat.NV21, size.width, size.height, null)
+                if (image != null) {
+                    val stream = ByteArrayOutputStream()
+                    image.compressToJpeg(Rect(0, 0, size.width, size.height), 80, stream)
+                    val bmp = BitmapFactory.decodeByteArray(stream.toByteArray(), 0, stream.size())
+                    rotateMyBitmap(bmp)
+                    stream.close()
+                }
+            } catch (ex: java.lang.Exception) {
+                Log.e("Sys", "Error:" + ex.message)
             }
         }
+    }
+
+    private fun rotateMyBitmap(bmp: Bitmap) {
+        //*****旋转一下
+        val matrix = Matrix()
+        matrix.postRotate(90f)
+        val bitmap = Bitmap.createBitmap(bmp.width, bmp.height, Bitmap.Config.ARGB_8888)
+        val nbmp2 = Bitmap.createBitmap(bmp, 0, 0, bmp.width, bmp.height, matrix, true)
+        mimageView.setImageBitmap(nbmp2)
     }
 
     //判断是否支持某一对焦模式
@@ -196,7 +230,6 @@ class CameraHelper(activity: Activity, surfaceView: SurfaceView) : Camera.Previe
         val info = Camera.CameraInfo()
         Camera.getCameraInfo(mCameraFacing, info)
         val rotation = activity.windowManager.defaultDisplay.rotation
-//        val rotation = Surface.ROTATION_90
 
         var screenDegree = 0
         when (rotation) {
@@ -229,27 +262,27 @@ class CameraHelper(activity: Activity, surfaceView: SurfaceView) : Camera.Previe
     }
 
     //将相机中用于表示人脸矩形的坐标转换成UI页面的坐标
-    private fun transForm(faces: Array<Camera.Face>): ArrayList<RectF> {
-        val matrix = Matrix()
-        // Need mirror for front camera.
-        val mirror = (mCameraFacing == Camera.CameraInfo.CAMERA_FACING_FRONT)
-        matrix.setScale(if (mirror) -1f else 1f, 1f)
-        // This is the value for android.hardware.Camera.setDisplayOrientation.
-        matrix.postRotate(mDisplayOrientation.toFloat())
-        // Camera driver coordinates range from (-1000, -1000) to (1000, 1000).
-        // UI coordinates range from (0, 0) to (width, height).
-        matrix.postScale(mSurfaceView.width / 2000f, mSurfaceView.height / 2000f)
-        matrix.postTranslate(mSurfaceView.width / 2f, mSurfaceView.height / 2f)
-
-        val rectList = ArrayList<RectF>()
-        for (face in faces) {
-            val srcRect = RectF(face.rect)
-            val dstRect = RectF(0f, 0f, 0f, 0f)
-            matrix.mapRect(dstRect, srcRect)
-            rectList.add(dstRect)
-        }
-        return rectList
-    }
+//    private fun transForm(faces: Array<Camera.Face>): ArrayList<RectF> {
+//        val matrix = Matrix()
+//        // Need mirror for front camera.
+//        val mirror = (mCameraFacing == Camera.CameraInfo.CAMERA_FACING_FRONT)
+//        matrix.setScale(if (mirror) -1f else 1f, 1f)
+//        // This is the value for android.hardware.Camera.setDisplayOrientation.
+//        matrix.postRotate(mDisplayOrientation.toFloat())
+//        // Camera driver coordinates range from (-1000, -1000) to (1000, 1000).
+//        // UI coordinates range from (0, 0) to (width, height).
+//        matrix.postScale(mSurfaceView.width / 2000f, mSurfaceView.height / 2000f)
+//        matrix.postTranslate(mSurfaceView.width / 2f, mSurfaceView.height / 2f)
+//
+//        val rectList = ArrayList<RectF>()
+//        for (face in faces) {
+//            val srcRect = RectF(face.rect)
+//            val dstRect = RectF(0f, 0f, 0f, 0f)
+//            matrix.mapRect(dstRect, srcRect)
+//            rectList.add(dstRect)
+//        }
+//        return rectList
+//    }
 
 
     private fun toast(msg: String) {
@@ -263,9 +296,9 @@ class CameraHelper(activity: Activity, surfaceView: SurfaceView) : Camera.Previe
     }
 
     interface CallBack {
-        fun onPreviewFrame(data: ByteArray?)
+//        fun onPreviewFrame(data: ByteArray?)
         fun onTakePic(data: ByteArray?)
-        fun onFaceDetect(faces: ArrayList<RectF>)
+//        fun onFaceDetect(faces: ArrayList<RectF>)
     }
 
     init {
