@@ -38,7 +38,7 @@ class CameraActivity : AppCompatActivity() {
     }
 
     private lateinit var mCameraHelper: CameraHelper
-    private var mMediaRecorderHelper: MediaRecorderHelper? = null
+//    private var mMediaRecorderHelper: MediaRecorderHelper? = null
     var mHelper: Helper = Helper()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -112,24 +112,22 @@ class CameraActivity : AppCompatActivity() {
 
         btnTakePic.setOnClickListener {
 //            mCameraHelper.takePic()
-            val timer = Timer()
-            timer.schedule(timerTask { mCameraHelper.takePic() }, 0,2000)
+//            val timer = Timer()
+//            timer.schedule(timerTask { mCameraHelper.takePic() }, 0,2000)
         }
         ivExchange.setOnClickListener { mCameraHelper.exchangeCamera() }
 
-        mHelper.handleSSLHandshake()
-//        btnStart.setOnClickListener {
-//            ivExchange.isClickable = false
-//            btnStart.visibility = View.GONE
-//            btnStop.visibility = View.VISIBLE
-//            mMediaRecorderHelper?.startRecord()
-//        }
-//        btnStop.setOnClickListener {
-//            btnStart.visibility = View.VISIBLE
-//            btnStop.visibility = View.GONE
-//            ivExchange.isClickable = true
-//            mMediaRecorderHelper?.stopRecord()
-//        }
+        btnStart.setOnClickListener {
+            btnStart.visibility = View.GONE
+            btnStop.visibility = View.VISIBLE
+            mCameraHelper.startGetPreviewImage()
+
+        }
+        btnStop.setOnClickListener {
+            btnStart.visibility = View.VISIBLE
+            btnStop.visibility = View.GONE
+            mCameraHelper.stopGetPreviewImage()
+        }
     }
 
 
@@ -163,11 +161,11 @@ class CameraActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         mCameraHelper.releaseCamera()
-        mMediaRecorderHelper?.let {
-            if (it.isRunning)
-                it.stopRecord()
-            it.release()
-        }
+//        mMediaRecorderHelper?.let {
+//            if (it.isRunning)
+//                it.stopRecord()
+//            it.release()
+//        }
         super.onDestroy()
     }
 

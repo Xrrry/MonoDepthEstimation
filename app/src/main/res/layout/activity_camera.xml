@@ -19,11 +19,6 @@
         android:layout_height="540px"
         android:layout_alignParentEnd="true"/>
 
-<!--    <com.example.monodepthestimation.view.FaceView-->
-<!--        android:id="@+id/faceView"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="match_parent" />-->
-
 
     <RelativeLayout
         android:id="@+id/rlBottom"
@@ -39,15 +34,14 @@
             android:layout_centerInParent="true"
             android:background="@drawable/shape_white_ring"
             android:src="@drawable/select_circle"
-            android:visibility="visible" />
+            android:visibility="gone" />
 
         <ImageView
             android:id="@+id/btnStart"
             android:layout_width="64dp"
             android:layout_height="64dp"
             android:layout_centerInParent="true"
-            android:src="@drawable/ic_start"
-            android:visibility="gone" />
+            android:src="@drawable/ic_start"/>
 
         <ImageView
             android:id="@+id/btnStop"

@@ -156,28 +156,56 @@ class CameraHelper(activity: Activity, surfaceView: SurfaceView, imageView: Imag
             it.setPreviewDisplay(mSurfaceHolder)
             setCameraDisplayOrientation(mActivity)
             it.startPreview()
-//            startFaceDetect()
-            startGetPreviewImage()
+//            startGetPreviewImage()
         }
     }
 
-    private fun startGetPreviewImage() {
+    fun startGetPreviewImage() {
         mCamera!!.setPreviewCallback { data, camera ->
             val size = camera.parameters.previewSize
             try {
                 val image = YuvImage(data, ImageFormat.NV21, size.width, size.height, null)
                 if (image != null) {
-                    val stream = ByteArrayOutputStream()
-                    image.compressToJpeg(Rect(0, 0, size.width, size.height), 80, stream)
-                    val bmp = BitmapFactory.decodeByteArray(stream.toByteArray(), 0, stream.size())
-                    rotateMyBitmap(bmp)
-                    stream.close()
+                    var time = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
+                    var miTime = SimpleDateFormat("SSS").format(Date()).substring(0, 1).toInt()
+                    var lastTime = application.time
+                    var has = application.has
+                    if(time!=lastTime) {
+                        println("$lastTime  $time  $miTime")
+                        application.time = time
+                        application.has = false
+                        val stream = ByteArrayOutputStream()
+                        image.compressToJpeg(Rect(0, 0, size.width, size.height), 80, stream)
+                        val bmp = BitmapFactory.decodeByteArray(stream.toByteArray(), 0, stream.size())
+                        rotateMyBitmap(bmp)
+                        stream.close()
+                    }
+                    else if(miTime>=5&&!has) {
+                        println("$lastTime  $time  $miTime")
+                        application.has = true
+                        val stream = ByteArrayOutputStream()
+                        image.compressToJpeg(Rect(0, 0, size.width, size.height), 80, stream)
+                        val bmp = BitmapFactory.decodeByteArray(stream.toByteArray(), 0, stream.size())
+                        rotateMyBitmap(bmp)
+                        stream.close()
+                    }
+//                    val stream = ByteArrayOutputStream()
+//                    image.compressToJpeg(Rect(0, 0, size.width, size.height), 80, stream)
+//                    val bmp = BitmapFactory.decodeByteArray(stream.toByteArray(), 0, stream.size())
+//                    rotateMyBitmap(bmp)
+//                    stream.close()
                 }
             } catch (ex: java.lang.Exception) {
                 Log.e("Sys", "Error:" + ex.message)
             }
         }
     }
+
+
+    fun stopGetPreviewImage() {
+        mCamera!!.stopPreview()
+    }
+
 
     private fun rotateMyBitmap(bmp: Bitmap) {
         //*****旋转一下
@@ -186,24 +214,22 @@ class CameraHelper(activity: Activity, surfaceView: SurfaceView, imageView: Imag
         val bitmap = Bitmap.createBitmap(bmp.width, bmp.height, Bitmap.Config.ARGB_8888)
         val nbmp2 = Bitmap.createBitmap(bmp, 0, 0, bmp.width, bmp.height, matrix, true)
 //        mimageView.setImageBitmap(nbmp2)
-        var time = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
-        var miTime = SimpleDateFormat("SSS").format(Date()).substring(0, 1).toInt()
-        var lastTime = application.time
-        var has = application.has
-//        var fps = application.fps
-        if(time!=lastTime) {
-            println("$lastTime  $time  $miTime")
-            application.time = time
-            application.has = false
-//            application.fps = 2
-            savePreviewPic(nbmp2, mimageView)
-        }
-        else if(miTime>=5&&!has) {
-            println("$lastTime  $time  $miTime")
-            application.has = true
-//            application.fps = fps - 1
-            savePreviewPic(nbmp2, mimageView)
-        }
+        savePreviewPic(nbmp2, mimageView)
+//        var time = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
+//        var miTime = SimpleDateFormat("SSS").format(Date()).substring(0, 1).toInt()
+//        var lastTime = application.time
+//        var has = application.has
+//        if(time!=lastTime) {
+//            println("$lastTime  $time  $miTime")
+//            application.time = time
+//            application.has = false
+//            savePreviewPic(nbmp2, mimageView)
+//        }
+//        else if(miTime>=5&&!has) {
+//            println("$lastTime  $time  $miTime")
+//            application.has = true
+//            savePreviewPic(nbmp2, mimageView)
+//        }
     }
 
     private fun savePreviewPic(data: Bitmap, mimageView: ImageView) {
@@ -223,15 +249,6 @@ class CameraHelper(activity: Activity, surfaceView: SurfaceView, imageView: Imag
     }
 
 
-//    private fun startFaceDetect() {
-//        mCamera?.let {
-//            it.startFaceDetection()
-//            it.setFaceDetectionListener { faces, _ ->
-//                mCallBack?.onFaceDetect(transForm(faces))
-//                log("检测到 ${faces.size} 张人脸")
-//            }
-//        }
-//    }
 
     //判断是否支持某一对焦模式
     private fun isSupportFocus(focusMode: String): Boolean {
@@ -305,29 +322,6 @@ class CameraHelper(activity: Activity, surfaceView: SurfaceView, imageView: Imag
         }
         return false
     }
-
-    //将相机中用于表示人脸矩形的坐标转换成UI页面的坐标
-//    private fun transForm(faces: Array<Camera.Face>): ArrayList<RectF> {
-//        val matrix = Matrix()
-//        // Need mirror for front camera.
-//        val mirror = (mCameraFacing == Camera.CameraInfo.CAMERA_FACING_FRONT)
-//        matrix.setScale(if (mirror) -1f else 1f, 1f)
-//        // This is the value for android.hardware.Camera.setDisplayOrientation.
-//        matrix.postRotate(mDisplayOrientation.toFloat())
-//        // Camera driver coordinates range from (-1000, -1000) to (1000, 1000).
-//        // UI coordinates range from (0, 0) to (width, height).
-//        matrix.postScale(mSurfaceView.width / 2000f, mSurfaceView.height / 2000f)
-//        matrix.postTranslate(mSurfaceView.width / 2f, mSurfaceView.height / 2f)
-//
-//        val rectList = ArrayList<RectF>()
-//        for (face in faces) {
-//            val srcRect = RectF(face.rect)
-//            val dstRect = RectF(0f, 0f, 0f, 0f)
-//            matrix.mapRect(dstRect, srcRect)
-//            rectList.add(dstRect)
-//        }
-//        return rectList
-//    }
 
 
     private fun toast(msg: String) {

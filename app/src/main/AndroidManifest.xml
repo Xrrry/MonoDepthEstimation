@@ -29,11 +29,6 @@
         tools:ignore="GoogleAppIndexingWarning">
         <activity android:name=".ssh"></activity>
         <activity android:name=".Orientation" />
-        <activity android:name=".GoogleCamera" />
-        <activity android:name=".CameraV" />
-        <activity android:name=".Home" />
-        <activity android:name=".CameraResult" />
-        <activity android:name=".Customcamera" />
         <activity android:name=".MainMenu" />
         <activity
             android:name=".camera1.CameraActivity"

@@ -49,11 +49,6 @@ class MainMenu : AppCompatActivity() {
             }
         }
         setContentView(R.layout.activity_main_menu)
-        btCapture.setOnClickListener {
-            PermissionUtils.checkPermission(this, permissionsList, Runnable {
-                startActivity(Intent(this, CaptureActivity::class.java))
-            })
-        }
         btCamera.setOnClickListener {
             PermissionUtils.checkPermission(this, permissionsList, Runnable {
                 val intent = Intent(this, CameraActivity::class.java)
@@ -61,13 +56,6 @@ class MainMenu : AppCompatActivity() {
                 startActivity(intent)
             })
         }
-//        btCameraRecord.setOnClickListener {
-//            PermissionUtils.checkPermission(this, permissionsList, Runnable {
-//                val intent = Intent(this, CameraActivity::class.java)
-//                intent.putExtra(CameraActivity.TYPE_TAG, CameraActivity.TYPE_RECORD)
-//                startActivity(intent)
-//            })
-//        }
 
         PermissionUtils.checkPermission(this, permissionsList, Runnable {
         })

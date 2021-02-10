@@ -35,11 +35,7 @@ import okhttp3.Response;
 
 public class Helper {
 
-    MyApplication application = new MyApplication();
     Handler handler = new Handler();
-    public void bitToImage(Bitmap bitmap, ImageView imageView) {
-        imageView.setImageBitmap(bitmap);
-    }
 
     public void getPrediction(File file, ImageView imageView, String ssh) throws IOException {
         OkHttpClient client = new OkHttpClient().newBuilder()
@@ -88,34 +84,5 @@ public class Helper {
         });
     }
 
-    public void handleSSLHandshake() {
-        try {
-            TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
-                public X509Certificate[] getAcceptedIssuers() {
-                    return new X509Certificate[0];
-                }
-
-                @Override
-                public void checkClientTrusted(X509Certificate[] certs, String authType) {
-                }
-
-                @Override
-                public void checkServerTrusted(X509Certificate[] certs, String authType) {
-                }
-            }};
-
-            SSLContext sc = SSLContext.getInstance("TLS");
-            // trustAllCerts信任所有的证书
-            sc.init(null, trustAllCerts, new SecureRandom());
-            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-            HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
-                @Override
-                public boolean verify(String hostname, SSLSession session) {
-                    return true;
-                }
-            });
-        } catch (Exception ignored) {
-        }
-    }
 
 }

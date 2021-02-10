@@ -9,6 +9,5 @@ import lombok.EqualsAndHashCode;
 @Data
 public class MyApplication extends Application {
     public String time = "";
-//    public int fps;
     public Boolean has = false;
 }
