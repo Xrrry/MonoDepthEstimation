@@ -9,8 +9,16 @@ import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.widget.ImageView
 import android.widget.Toast
+import com.example.monodepthestimation.MyApplication
 import com.example.monodepthestimation.log
+import com.example.monodepthestimation.util.BitmapUtils
+import com.example.monodepthestimation.util.FileUtil
+import okio.buffer
+import okio.sink
 import java.io.ByteArrayOutputStream
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.concurrent.thread
 
 /**
  * author :  chensen
@@ -18,14 +26,16 @@ import java.io.ByteArrayOutputStream
  * desc :
  */
 //: Camera.PreviewCallback
-class CameraHelper(activity: Activity, surfaceView: SurfaceView, imageView: ImageView) {
+class CameraHelper(activity: Activity, surfaceView: SurfaceView, imageView: ImageView, ssh: String) {
 
+    var application = MyApplication()
     private var mCamera: Camera? = null                   //Camera对象
     private lateinit var mParameters: Camera.Parameters   //Camera对象的参数
     private var mSurfaceView: SurfaceView = surfaceView   //用于预览的SurfaceView对象
     private var mimageView: ImageView = imageView
     var mSurfaceHolder: SurfaceHolder                     //SurfaceHolder对象
-
+    var mHelper: Helper = Helper()
+    var sssh: String = ssh
 
     private var mActivity: Activity = activity
     private var mCallBack: CallBack? = null   //自定义的回调
@@ -33,8 +43,8 @@ class CameraHelper(activity: Activity, surfaceView: SurfaceView, imageView: Imag
     var mCameraFacing = Camera.CameraInfo.CAMERA_FACING_BACK  //摄像头方向
     var mDisplayOrientation: Int = 0    //预览旋转的角度
 
-    private var picWidth = 1440        //保存图片的宽
-    private var picHeight = 1920       //保存图片的高
+    private var picWidth = 600        //保存图片的宽
+    private var picHeight = 800       //保存图片的高
 
 //    override fun onPreviewFrame(data: ByteArray?, camera: Camera?) {
 //        mCallBack?.onPreviewFrame(data)
@@ -93,9 +103,9 @@ class CameraHelper(activity: Activity, surfaceView: SurfaceView, imageView: Imag
 
             //获取与指定宽高相等或最接近的尺寸
             //设置预览尺寸
-            val bestPreviewSize = getBestSize(mSurfaceView.width, mSurfaceView.height, mParameters.supportedPreviewSizes)
+            val bestPreviewSize = getBestSize(mSurfaceView.width*2, mSurfaceView.height*2, mParameters.supportedPreviewSizes)
             bestPreviewSize?.let {
-                mParameters.setPreviewSize(it.width, it.height)
+                mParameters.setPreviewSize(it.height, it.width)
             }
             //设置保存图片尺寸
             val bestPicSize = getBestSize(picWidth, picHeight, mParameters.supportedPictureSizes)
@@ -112,7 +122,33 @@ class CameraHelper(activity: Activity, surfaceView: SurfaceView, imageView: Imag
             toast("相机初始化失败!")
         }
     }
+    //获取与指定宽高相等或最接近的尺寸
+    private fun getBestSize(targetWidth: Int, targetHeight: Int, sizeList: List<Camera.Size>): Camera.Size? {
+        var bestSize: Camera.Size? = null
+        val targetRatio = (targetHeight.toDouble() / targetWidth)  //目标大小的宽高比
+        var minDiff = targetRatio
 
+        for (size in sizeList) {
+            val supportedRatio = (size.width.toDouble() / size.height)
+            log("系统支持的尺寸 : ${size.width} * ${size.height} ,    比例$supportedRatio")
+        }
+
+        for (size in sizeList) {
+            if (size.width == targetHeight && size.height == targetWidth) {
+                bestSize = size
+                break
+            }
+
+            val supportedRatio = (size.width.toDouble() / size.height)
+            if (Math.abs(supportedRatio - targetRatio) < minDiff) {
+                minDiff = Math.abs(supportedRatio - targetRatio)
+                bestSize = size
+            }
+        }
+        log("目标尺寸 ：$targetWidth * $targetHeight ，   比例  $targetRatio")
+        log("最优尺寸 ：${bestSize?.height} * ${bestSize?.width}")
+        return bestSize
+    }
 
     //开始预览
     fun startPreview() {
@@ -124,16 +160,6 @@ class CameraHelper(activity: Activity, surfaceView: SurfaceView, imageView: Imag
             startGetPreviewImage()
         }
     }
-
-//    private fun startFaceDetect() {
-//        mCamera?.let {
-//            it.startFaceDetection()
-//            it.setFaceDetectionListener { faces, _ ->
-//                mCallBack?.onFaceDetect(transForm(faces))
-//                log("检测到 ${faces.size} 张人脸")
-//            }
-//        }
-//    }
 
     private fun startGetPreviewImage() {
         mCamera!!.setPreviewCallback { data, camera ->
@@ -156,11 +182,56 @@ class CameraHelper(activity: Activity, surfaceView: SurfaceView, imageView: Imag
     private fun rotateMyBitmap(bmp: Bitmap) {
         //*****旋转一下
         val matrix = Matrix()
-        matrix.postRotate(90f)
+        matrix.postRotate(0f)
         val bitmap = Bitmap.createBitmap(bmp.width, bmp.height, Bitmap.Config.ARGB_8888)
         val nbmp2 = Bitmap.createBitmap(bmp, 0, 0, bmp.width, bmp.height, matrix, true)
-        mimageView.setImageBitmap(nbmp2)
+//        mimageView.setImageBitmap(nbmp2)
+        var time = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
+        var miTime = SimpleDateFormat("SSS").format(Date()).substring(0, 1).toInt()
+        var lastTime = application.time
+        var has = application.has
+//        var fps = application.fps
+        if(time!=lastTime) {
+            println("$lastTime  $time  $miTime")
+            application.time = time
+            application.has = false
+//            application.fps = 2
+            savePreviewPic(nbmp2, mimageView)
+        }
+        else if(miTime>=5&&!has) {
+            println("$lastTime  $time  $miTime")
+            application.has = true
+//            application.fps = fps - 1
+            savePreviewPic(nbmp2, mimageView)
+        }
     }
+
+    private fun savePreviewPic(data: Bitmap, mimageView: ImageView) {
+        val picFile = FileUtil.createCameraFile()
+        thread {
+            try {
+                picFile!!.sink().buffer().write(BitmapUtils.toByteArray(data)).close()
+                println(picFile?.absolutePath)
+                mHelper.getPrediction(picFile, mimageView, sssh)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                //                runOnUiThread {
+                //                    toast("保存图片失败！")
+                //                }
+            }
+        }
+    }
+
+
+//    private fun startFaceDetect() {
+//        mCamera?.let {
+//            it.startFaceDetection()
+//            it.setFaceDetectionListener { faces, _ ->
+//                mCallBack?.onFaceDetect(transForm(faces))
+//                log("检测到 ${faces.size} 张人脸")
+//            }
+//        }
+//    }
 
     //判断是否支持某一对焦模式
     private fun isSupportFocus(focusMode: String): Boolean {
@@ -197,33 +268,7 @@ class CameraHelper(activity: Activity, surfaceView: SurfaceView, imageView: Imag
         }
     }
 
-    //获取与指定宽高相等或最接近的尺寸
-    private fun getBestSize(targetWidth: Int, targetHeight: Int, sizeList: List<Camera.Size>): Camera.Size? {
-        var bestSize: Camera.Size? = null
-        val targetRatio = (targetHeight.toDouble() / targetWidth)  //目标大小的宽高比
-        var minDiff = targetRatio
 
-        for (size in sizeList) {
-            val supportedRatio = (size.width.toDouble() / size.height)
-            log("系统支持的尺寸 : ${size.width} * ${size.height} ,    比例$supportedRatio")
-        }
-
-        for (size in sizeList) {
-            if (size.width == targetHeight && size.height == targetWidth) {
-                bestSize = size
-                break
-            }
-
-            val supportedRatio = (size.width.toDouble() / size.height)
-            if (Math.abs(supportedRatio - targetRatio) < minDiff) {
-                minDiff = Math.abs(supportedRatio - targetRatio)
-                bestSize = size
-            }
-        }
-        log("目标尺寸 ：$targetWidth * $targetHeight ，   比例  $targetRatio")
-        log("最优尺寸 ：${bestSize?.height} * ${bestSize?.width}")
-        return bestSize
-    }
 
     //设置预览旋转的角度
     private fun setCameraDisplayOrientation(activity: Activity) {

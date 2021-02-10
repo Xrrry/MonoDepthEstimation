@@ -1,7 +1,9 @@
 package com.example.monodepthestimation
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Build
@@ -47,7 +49,6 @@ class MainMenu : AppCompatActivity() {
             }
         }
         setContentView(R.layout.activity_main_menu)
-
         btCapture.setOnClickListener {
             PermissionUtils.checkPermission(this, permissionsList, Runnable {
                 startActivity(Intent(this, CaptureActivity::class.java))

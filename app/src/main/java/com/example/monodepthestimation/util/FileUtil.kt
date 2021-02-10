@@ -35,7 +35,7 @@ object FileUtil {
             if (!rootFile.exists())
                 rootFile.mkdirs()
 
-            val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
+            val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmssSSS").format(Date())
             val fileName = "IMG_$timeStamp.jpg"
             File(rootFile.absolutePath + File.separator + fileName)
         } catch (e: Exception) {

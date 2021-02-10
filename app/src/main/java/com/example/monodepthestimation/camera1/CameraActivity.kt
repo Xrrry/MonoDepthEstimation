@@ -1,9 +1,9 @@
 package com.example.monodepthestimation.camera1
 
+import android.content.Context
 import android.content.pm.ActivityInfo
 import android.graphics.BitmapFactory
 import android.graphics.Color
-import android.graphics.RectF
 import android.hardware.Camera
 import android.os.Build
 import android.os.Bundle
@@ -20,7 +20,9 @@ import com.example.monodepthestimation.util.FileUtil
 import kotlinx.android.synthetic.main.activity_camera.*
 import okio.buffer
 import okio.sink
+import java.util.*
 import kotlin.concurrent.thread
+import kotlin.concurrent.timerTask
 
 
 /**
@@ -35,13 +37,13 @@ class CameraActivity : AppCompatActivity() {
         const val TYPE_RECORD = 1
     }
 
-//    var lock = false //控制MediaRecorderHelper的初始化
     private lateinit var mCameraHelper: CameraHelper
     private var mMediaRecorderHelper: MediaRecorderHelper? = null
+    var mHelper: Helper = Helper()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
         // 隐藏标题栏
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE)
         // 隐藏状态栏
@@ -66,8 +68,23 @@ class CameraActivity : AppCompatActivity() {
         }
         setContentView(R.layout.activity_camera)
         window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
+        var sp = this.getSharedPreferences("default", MODE_PRIVATE)
+        var ssh = sp.getString("ssh", "null").toString()
+        println(ssh)
+        val dm = DisplayMetrics()
+        windowManager.defaultDisplay.getMetrics(dm)
+//        val screenHeight = dm.heightPixels / 2
+//        val screenWidth = (screenHeight/4*3)
+        val screenWidth = dm.widthPixels / 2
+        val screenHeight = (screenWidth*2/3)
+        println(screenHeight)
+        println(screenWidth)
+        surfaceView.layoutParams.height = screenHeight
+        imageView.layoutParams.height = screenHeight
+        surfaceView.layoutParams.width = screenWidth
+        imageView.layoutParams.width = screenWidth
 
-        mCameraHelper = CameraHelper(this, surfaceView, imageView)
+        mCameraHelper = CameraHelper(this, surfaceView, imageView, ssh)
         mCameraHelper.addCallBack(object : CameraHelper.CallBack {
 //            override fun onFaceDetect(faces: ArrayList<RectF>) {
 //                faceView.setFaces(faces)
@@ -87,25 +104,20 @@ class CameraActivity : AppCompatActivity() {
 //                }
 //            }
         })
-        val dm = DisplayMetrics()
-        windowManager.defaultDisplay.getMetrics(dm)
-        val screenHeight = dm.heightPixels / 2
-        val screenWidth = (screenHeight/4*3)
-        surfaceView.layoutParams.height = screenHeight
-        imageView.layoutParams.height = screenHeight
-        surfaceView.layoutParams.width = screenWidth
-        imageView.layoutParams.width = screenWidth
+
         if (intent.getIntExtra(TYPE_TAG, 0) == TYPE_RECORD) { //录视频
             btnTakePic.visibility = View.GONE
             btnStart.visibility = View.VISIBLE
         }
 
         btnTakePic.setOnClickListener {
-            mCameraHelper.takePic()
-//            val timer = Timer()
-//            timer.schedule(timerTask { mCameraHelper.takePic() }, 0,1000)
+//            mCameraHelper.takePic()
+            val timer = Timer()
+            timer.schedule(timerTask { mCameraHelper.takePic() }, 0,2000)
         }
         ivExchange.setOnClickListener { mCameraHelper.exchangeCamera() }
+
+        mHelper.handleSSLHandshake()
 //        btnStart.setOnClickListener {
 //            ivExchange.isClickable = false
 //            btnStart.visibility = View.GONE
@@ -134,9 +146,11 @@ class CameraActivity : AppCompatActivity() {
                         BitmapUtils.rotate(rawBitmap, 0f)
                     picFile.sink().buffer().write(BitmapUtils.toByteArray(resultBitmap)).close()
                     runOnUiThread {
-                        toast("图片已保存! ${picFile.absolutePath}")
+//                        toast("图片已保存! ${picFile.absolutePath}")
                         log("图片已保存! 耗时：${System.currentTimeMillis() - temp}    路径：  ${picFile.absolutePath}")
                     }
+//                    println(picFile?.absolutePath)
+//                    mHelper.getPrediction(picFile, imageView)
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -156,5 +170,6 @@ class CameraActivity : AppCompatActivity() {
         }
         super.onDestroy()
     }
+
 
 }

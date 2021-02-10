@@ -25,7 +25,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
+        android:usesCleartextTraffic="true"
         tools:ignore="GoogleAppIndexingWarning">
+        <activity android:name=".ssh"></activity>
         <activity android:name=".Orientation" />
         <activity android:name=".GoogleCamera" />
         <activity android:name=".CameraV" />
@@ -33,7 +35,9 @@
         <activity android:name=".CameraResult" />
         <activity android:name=".Customcamera" />
         <activity android:name=".MainMenu" />
-        <activity android:name=".camera1.CameraActivity"/>
+        <activity
+            android:name=".camera1.CameraActivity"
+            android:screenOrientation="landscape"></activity>
         <activity android:name=".CaptureActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>
