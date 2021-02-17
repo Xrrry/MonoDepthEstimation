@@ -2,22 +2,32 @@ package com.example.monodepthestimation;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.media.AudioManager;
+import android.media.SoundPool;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.view.View;
 import android.view.Window;
 import android.widget.EditText;
 import android.widget.Toast;
+import com.example.monodepthestimation.R;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.HashMap;
+
+import lombok.ToString;
 
 public class ssh extends AppCompatActivity {
 
     Handler handler = new Handler();
+    SoundPool sp;
+    HashMap<Integer, Integer> sounddata;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,5 +79,42 @@ public class ssh extends AppCompatActivity {
                 finish();
             }
         });
+
+        InitSound();
+//        playSound(1,1);
+    }
+
+
+    public void InitSound() {
+        sp = new SoundPool(5, AudioManager.STREAM_MUSIC, 5);
+        sounddata = new HashMap<Integer, Integer>();
+        sounddata.put(1, sp.load(this, R.raw.tone_600hz, 1));
+        sp.setOnLoadCompleteListener(new SoundPool.OnLoadCompleteListener(){
+            @Override
+            public void onLoadComplete(SoundPool sound,int sampleId,int status){
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(getApplicationContext(), "声音加载成功" ,Toast.LENGTH_SHORT).show();
+                    }
+                });
+                playSound(1,0);
+            }
+        });
+    }
+
+    public void playSound(int sound, int number) {
+        AudioManager am = (AudioManager) this
+                .getSystemService(Context.AUDIO_SERVICE);
+        float audioMaxVolumn = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+        float volumnCurrent = am.getStreamVolume(AudioManager.STREAM_MUSIC);
+        float volumnRatio = volumnCurrent / audioMaxVolumn;
+
+        sp.play(sounddata.get(sound),
+                volumnRatio,// 左声道音量
+                volumnRatio,// 右声道音量
+                1, // 优先级
+                number,// 循环播放次数
+                1);// 回放速度，该值在0.5-2.0之间 1为正常速度
     }
 }
