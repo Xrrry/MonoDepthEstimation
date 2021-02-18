@@ -27,12 +27,13 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".ssh"></activity>
+        <activity android:name=".Sound"></activity>
+        <activity android:name=".ssh" />
         <activity android:name=".Orientation" />
         <activity android:name=".MainMenu" />
         <activity
             android:name=".camera1.CameraActivity"
-            android:screenOrientation="landscape"></activity>
+            android:screenOrientation="landscape" />
         <activity android:name=".CaptureActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>

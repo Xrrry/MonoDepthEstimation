@@ -83,6 +83,13 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+        findViewById(R.id.sound).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, Sound.class);
+                startActivity(intent);
+            }
+        });
     }
     private int isHardwareSupported(CameraCharacteristics characteristics) {
         Integer deviceLevel = characteristics.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL);
