@@ -1,21 +1,28 @@
 package com.example.monodepthestimation.camera1;
 
 
+import android.app.Application;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.media.AudioManager;
+import android.media.SoundPool;
 import android.os.Handler;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.monodepthestimation.MyApplication;
+import com.example.monodepthestimation.R;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
+import java.util.HashMap;
+import java.util.List;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -36,6 +43,7 @@ import okhttp3.Response;
 public class Helper {
 
     Handler handler = new Handler();
+//    MyApplication myApplication = new MyApplication();
 
     public void getPrediction(File file, ImageView imageView, String ssh) throws IOException {
         OkHttpClient client = new OkHttpClient().newBuilder()
@@ -68,6 +76,18 @@ public class Helper {
 //                    matrix.postRotate(90f);
 //                    Bitmap nbmp2 = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
                     is.close();
+                    Integer leftVolumn = Integer.valueOf(response.header("Left-Volumn"));
+                    Integer rightVolumn = Integer.valueOf(response.header("Right-Volumn"));
+                    Integer level = Integer.valueOf(response.header("Depth-Level"));
+//                    myApplication.setLeftVolumn(leftVolumn);
+//                    myApplication.setRightVolumn(rightVolumn);
+//                    myApplication.setLevel(level);
+                    MyApplication.level = level;
+                    MyApplication.leftVolumn = leftVolumn;
+                    MyApplication.rightVolumn = rightVolumn;
+//                    System.out.println(myApplication.getLeftVolumn());
+//                    System.out.println(myApplication.getRightVolumn());
+//                    System.out.println(myApplication.getLevel());
                     handler.post(new Runnable() {
                         @Override
                         public void run() {

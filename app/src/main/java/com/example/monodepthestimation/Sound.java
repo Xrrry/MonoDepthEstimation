@@ -19,9 +19,9 @@ import java.util.HashMap;
 
 public class Sound extends AppCompatActivity {
 
-    Handler handler = new Handler();
     SoundPool sp;
     HashMap<Integer, Integer> sounddata;
+    Integer nowSound;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,34 +52,57 @@ public class Sound extends AppCompatActivity {
         }
         setContentView(R.layout.activity_sound);
         InitSound();
-        findViewById(R.id.s10).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                playSound(1, 0);
-            }
-        });
-        findViewById(R.id.s1).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                playSound(2, 1);
-            }
-        });
+//        findViewById(R.id.s10).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                if(nowSound!=null) {
+//                    sp.stop(nowSound);
+//                }
+//                playSound(1, 0, 10,  0);
+//            }
+//        });
+//        findViewById(R.id.s1).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                if(nowSound!=null) {
+//                    sp.stop(nowSound);
+//                }
+//                playSound(2, 0, 8, 3);
+//            }
+//        });
         findViewById(R.id.s05).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                playSound(3, 3);
+                if(nowSound!=null) {
+                    sp.stop(nowSound);
+                }
+                playSound(1, 0, 10, 10);
             }
         });
         findViewById(R.id.s025).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                playSound(4, 7);
+                if(nowSound!=null) {
+                    sp.stop(nowSound);
+                }
+                playSound(2, 1, 5, 10);
             }
         });
         findViewById(R.id.s0125).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                playSound(5, 15);
+                if(nowSound!=null) {
+                    sp.stop(nowSound);
+                }
+                playSound(3, 3, 10, 5);
+            }
+        });
+        findViewById(R.id.stop).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(nowSound!=null) {
+                    sp.stop(nowSound);
+                }
             }
         });
     }
@@ -87,35 +110,24 @@ public class Sound extends AppCompatActivity {
     public void InitSound() {
         sp = new SoundPool(5, AudioManager.STREAM_MUSIC, 0);
         sounddata = new HashMap<Integer, Integer>();
-        sounddata.put(1, sp.load(this, R.raw.sine_tone_600hz_10s, 1));
-        sounddata.put(2, sp.load(this, R.raw.sine_tone_600hz_1s, 1));
-        sounddata.put(3, sp.load(this, R.raw.sine_tone_600hz_05s, 1));
-        sounddata.put(4, sp.load(this, R.raw.sine_tone_600hz_025s, 1));
-        sounddata.put(5, sp.load(this, R.raw.sine_tone_600hz_0125s, 1));
-        sp.setOnLoadCompleteListener(new SoundPool.OnLoadCompleteListener(){
-            @Override
-            public void onLoadComplete(SoundPool sound,int sampleId,int status){
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(getApplicationContext(), "声音加载成功" ,Toast.LENGTH_SHORT).show();
-                    }
-                });
-//                playSound(s,number);
-            }
-        });
+//        sounddata.put(1, sp.load(this, R.raw.sine_tone_600hz_10s, 1));
+//        sounddata.put(2, sp.load(this, R.raw.sine_tone_600hz_1s, 1));
+        sounddata.put(1, sp.load(this, R.raw.sine_tone_600hz_05s, 1));
+        sounddata.put(2, sp.load(this, R.raw.sine_tone_600hz_025s, 1));
+        sounddata.put(3, sp.load(this, R.raw.sine_tone_600hz_0125s, 1));
     }
 
-    public void playSound(int sound, int number) {
-        AudioManager am = (AudioManager) this
-                .getSystemService(Context.AUDIO_SERVICE);
+    public void playSound(int sound, int number, int leftVolumn, int rightVolumn) {
+        AudioManager am = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
         float audioMaxVolumn = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
         float volumnCurrent = am.getStreamVolume(AudioManager.STREAM_MUSIC);
         float volumnRatio = volumnCurrent / audioMaxVolumn;
+        System.out.println(volumnCurrent);
+        System.out.println(volumnRatio);
 
-        sp.play(sounddata.get(sound),
-                volumnRatio,// 左声道音量
-                volumnRatio,// 右声道音量
+        nowSound = sp.play(sounddata.get(sound),
+                volumnRatio/10*leftVolumn,// 左声道音量
+                volumnRatio/10*rightVolumn,// 右声道音量
                 1, // 优先级
                 number,// 循环播放次数
                 1);// 回放速度，该值在0.5-2.0之间 1为正常速度

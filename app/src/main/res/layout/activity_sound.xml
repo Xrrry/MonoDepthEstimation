@@ -7,39 +7,32 @@
     tools:context=".Sound">
 
     <Button
-        android:id="@+id/s10"
+        android:id="@+id/stop"
         android:layout_width="200dp"
         android:layout_height="80dp"
-        android:text="10s"
+        android:text="stopall"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="100dp"/>
-    <Button
-        android:id="@+id/s1"
-        android:layout_width="200dp"
-        android:layout_height="80dp"
-        android:text="1s"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="200dp"/>
     <Button
         android:id="@+id/s05"
         android:layout_width="200dp"
         android:layout_height="80dp"
         android:text="0.5s"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="300dp"/>
+        android:layout_marginTop="200dp"/>
     <Button
         android:id="@+id/s025"
         android:layout_width="200dp"
         android:layout_height="80dp"
         android:text="0.25s"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="400dp"/>
+        android:layout_marginTop="300dp"/>
     <Button
         android:id="@+id/s0125"
         android:layout_width="200dp"
         android:layout_height="80dp"
         android:text="0.125s"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="500dp"/>
+        android:layout_marginTop="400dp"/>
 
 </RelativeLayout>

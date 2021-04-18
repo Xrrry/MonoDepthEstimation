@@ -34,7 +34,6 @@
         <activity
             android:name=".camera1.CameraActivity"
             android:screenOrientation="landscape" />
-        <activity android:name=".CaptureActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

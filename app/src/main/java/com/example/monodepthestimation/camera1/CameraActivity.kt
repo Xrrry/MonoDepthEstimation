@@ -5,6 +5,8 @@ import android.content.pm.ActivityInfo
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.hardware.Camera
+import android.media.AudioManager
+import android.media.SoundPool
 import android.os.Build
 import android.os.Bundle
 import android.util.DisplayMetrics
@@ -12,6 +14,7 @@ import android.view.View
 import android.view.Window
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
+import com.example.monodepthestimation.MyApplication
 import com.example.monodepthestimation.R
 import com.example.monodepthestimation.log
 import com.example.monodepthestimation.toast
@@ -22,7 +25,6 @@ import okio.buffer
 import okio.sink
 import java.util.*
 import kotlin.concurrent.thread
-import kotlin.concurrent.timerTask
 
 
 /**
@@ -37,9 +39,15 @@ class CameraActivity : AppCompatActivity() {
         const val TYPE_RECORD = 1
     }
 
+//    var application = MyApplication()
     private lateinit var mCameraHelper: CameraHelper
 //    private var mMediaRecorderHelper: MediaRecorderHelper? = null
     var mHelper: Helper = Helper()
+    var sp: SoundPool? = null
+    var sounddata: HashMap<Int, Int>? = null
+    var nowSound: Int? = null
+    private var mTimer: Timer? = null
+    private var mTimerTask: TimerTask? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -121,14 +129,69 @@ class CameraActivity : AppCompatActivity() {
             btnStart.visibility = View.GONE
             btnStop.visibility = View.VISIBLE
             mCameraHelper.startGetPreviewImage()
+            startTimer()
 
         }
         btnStop.setOnClickListener {
             btnStart.visibility = View.VISIBLE
             btnStop.visibility = View.GONE
             mCameraHelper.stopGetPreviewImage()
+            mTimer!!.cancel()
         }
+        InitSound()
     }
+
+    fun InitSound() {
+        sp = SoundPool(5, AudioManager.STREAM_MUSIC, 0)
+        sounddata = HashMap()
+        sounddata!!.put(1, sp!!.load(this, R.raw.sine_tone_600hz_05s, 1))
+        sounddata!!.put(2, sp!!.load(this, R.raw.sine_tone_600hz_025s, 1))
+        sounddata!!.put(3, sp!!.load(this, R.raw.sine_tone_600hz_0125s, 1))
+    }
+
+    fun playSound(sound: Int, number: Int, leftVolumn: Int, rightVolumn: Int) {
+        val am = this.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        val audioMaxVolumn = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC).toFloat()
+        val volumnCurrent = am.getStreamVolume(AudioManager.STREAM_MUSIC).toFloat()
+        val volumnRatio = volumnCurrent / audioMaxVolumn
+        println(volumnCurrent)
+        println(volumnRatio)
+        nowSound = sounddata!![sound]?.let {
+            sp!!.play(it,
+                    volumnRatio / 10 * leftVolumn,  // 左声道音量
+                    volumnRatio / 10 * rightVolumn,  // 右声道音量
+                    1,  // 优先级
+                    number, 1f)
+        } // 回放速度，该值在0.5-2.0之间 1为正常速度
+    }
+
+
+    private fun startTimer() {
+        if (mTimer == null) {
+            mTimer = Timer()
+        }
+        if (mTimerTask == null) {
+            mTimerTask = object : TimerTask() {
+                override fun run() {
+                    try {
+                        println("level" + MyApplication.level)
+                        println("left" + MyApplication.leftVolumn)
+                        println("right" + MyApplication.rightVolumn)
+                        if (nowSound != null) {
+                            sp!!.stop(nowSound!!)
+                        }
+                        if(MyApplication.level!=0) {
+                            playSound(MyApplication.level, 3, MyApplication.leftVolumn, MyApplication.rightVolumn)
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+            }
+        }
+        if (mTimer != null && mTimerTask != null) mTimer!!.schedule(mTimerTask, 0, 1000)
+    }
+
 
 
     fun savePic(data: ByteArray?) {
@@ -144,7 +207,6 @@ class CameraActivity : AppCompatActivity() {
                         BitmapUtils.rotate(rawBitmap, 0f)
                     picFile.sink().buffer().write(BitmapUtils.toByteArray(resultBitmap)).close()
                     runOnUiThread {
-//                        toast("图片已保存! ${picFile.absolutePath}")
                         log("图片已保存! 耗时：${System.currentTimeMillis() - temp}    路径：  ${picFile.absolutePath}")
                     }
 //                    println(picFile?.absolutePath)

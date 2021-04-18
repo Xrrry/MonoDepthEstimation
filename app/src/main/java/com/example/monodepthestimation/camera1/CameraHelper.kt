@@ -168,12 +168,12 @@ class CameraHelper(activity: Activity, surfaceView: SurfaceView, imageView: Imag
                 if (image != null) {
                     var time = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
                     var miTime = SimpleDateFormat("SSS").format(Date()).substring(0, 1).toInt()
-                    var lastTime = application.time
-                    var has = application.has
+                    var lastTime = MyApplication.time
+                    var has = MyApplication.has
                     if(time!=lastTime) {
                         println("$lastTime  $time  $miTime")
-                        application.time = time
-                        application.has = false
+                        MyApplication.time = time
+                        MyApplication.has = false
                         val stream = ByteArrayOutputStream()
                         image.compressToJpeg(Rect(0, 0, size.width, size.height), 80, stream)
                         val bmp = BitmapFactory.decodeByteArray(stream.toByteArray(), 0, stream.size())
@@ -182,7 +182,7 @@ class CameraHelper(activity: Activity, surfaceView: SurfaceView, imageView: Imag
                     }
                     else if(miTime>=5&&!has) {
                         println("$lastTime  $time  $miTime")
-                        application.has = true
+                        MyApplication.has = true
                         val stream = ByteArrayOutputStream()
                         image.compressToJpeg(Rect(0, 0, size.width, size.height), 80, stream)
                         val bmp = BitmapFactory.decodeByteArray(stream.toByteArray(), 0, stream.size())
@@ -241,9 +241,6 @@ class CameraHelper(activity: Activity, surfaceView: SurfaceView, imageView: Imag
                 mHelper.getPrediction(picFile, mimageView, sssh)
             } catch (e: Exception) {
                 e.printStackTrace()
-                //                runOnUiThread {
-                //                    toast("保存图片失败！")
-                //                }
             }
         }
     }
