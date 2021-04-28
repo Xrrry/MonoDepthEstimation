@@ -90,19 +90,15 @@ public class Orientation extends AppCompatActivity {
             if (degrees > 315 || degrees <= 45) {
                 return 0;
             }
-
             if (degrees > 45 && degrees <= 135) {
                 return 90;
             }
-
             if (degrees > 135 && degrees <= 225) {
                 return 180;
             }
-
             if (degrees > 225 && degrees <= 315) {
                 return 270;
             }
-
             throw new RuntimeException("The physics as we know them are no more. Watch out for anomalies.");
         }
 

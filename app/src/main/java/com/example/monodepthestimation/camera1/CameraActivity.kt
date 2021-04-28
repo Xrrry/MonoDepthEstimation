@@ -2,19 +2,20 @@ package com.example.monodepthestimation.camera1
 
 import android.content.Context
 import android.content.pm.ActivityInfo
-import android.graphics.BitmapFactory
 import android.graphics.Color
-import android.hardware.Camera
+import android.hardware.SensorManager
 import android.media.AudioManager
 import android.media.SoundPool
 import android.os.Build
 import android.os.Bundle
 import android.util.DisplayMetrics
+import android.view.OrientationEventListener
 import android.view.View
 import android.view.Window
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import com.example.monodepthestimation.MyApplication
+import com.example.monodepthestimation.Orientation
 import com.example.monodepthestimation.R
 import kotlinx.android.synthetic.main.activity_camera.*
 import java.util.*
@@ -37,6 +38,8 @@ class CameraActivity : AppCompatActivity() {
     var nowSound: Int? = null
     private var mTimer: Timer? = null
     private var mTimerTask: TimerTask? = null
+    private var orientationListener: CameraOrientationListener? = null
+    private var mOrientation = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -83,7 +86,6 @@ class CameraActivity : AppCompatActivity() {
 
         mCameraHelper = CameraHelper(this, surfaceView, imageView, ssh)
 
-        ivExchange.setOnClickListener { mCameraHelper.exchangeCamera() }
 
         btnStart.setOnClickListener {
             btnStart.visibility = View.GONE
@@ -98,6 +100,9 @@ class CameraActivity : AppCompatActivity() {
             mTimer!!.cancel()
         }
         InitSound()
+        orientationListener = CameraOrientationListener(this)
+        orientationListener!!.enable()
+        startOrientationChangeListener()
     }
 
     fun InitSound() {
@@ -152,10 +157,77 @@ class CameraActivity : AppCompatActivity() {
         if (mTimer != null && mTimerTask != null) mTimer!!.schedule(mTimerTask, 0, 1000)
     }
 
+    private fun startOrientationChangeListener() {
+        val mOrEventListener: OrientationEventListener = object : OrientationEventListener(this) {
+            override fun onOrientationChanged(rotation: Int) {
+                var rotation = rotation
+                rotation = if (rotation >= 0 && rotation <= 45 || rotation > 315) {
+                    0
+                } else if (rotation > 45 && rotation <= 135) {
+                    90
+                } else if (rotation > 135 && rotation <= 225) {
+                    180
+                } else if (rotation > 225 && rotation <= 315) {
+                    270
+                } else {
+                    0
+                }
+                if (rotation == mOrientation) return
+                mOrientation = rotation
+            }
+        }
+        mOrEventListener.enable()
+    }
+
+    private class CameraOrientationListener(context: Context?) : OrientationEventListener(context, SensorManager.SENSOR_DELAY_NORMAL) {
+        private var mCurrentNormalizedOrientation = 0
+
+        /**
+         * 获取当前方向
+         *
+         * @return
+         */
+        var rememberedNormalOrientation = 0
+            private set
+
+        override fun onOrientationChanged(orientation: Int) {
+            if (orientation != ORIENTATION_UNKNOWN) {
+                mCurrentNormalizedOrientation = normalize(orientation)
+            }
+            val str = "当前屏幕手持角度:$orientation°\n当前屏幕手持方向:$mCurrentNormalizedOrientation"
+            println(str)
+        }
+
+        private fun normalize(degrees: Int): Int {
+            if (degrees > 315 || degrees <= 45) {
+                return 0
+            }
+            if (degrees > 45 && degrees <= 135) {
+                return 90
+            }
+            if (degrees > 135 && degrees <= 225) {
+                return 180
+            }
+            if (degrees > 225 && degrees <= 315) {
+                return 270
+            }
+            throw RuntimeException("The physics as we know them are no more. Watch out for anomalies.")
+        }
+
+        /**
+         * 记录方向
+         */
+        fun rememberOrientation() {
+            rememberedNormalOrientation = mCurrentNormalizedOrientation
+        }
+
+    }
+
 
     override fun onDestroy() {
         mCameraHelper.releaseCamera()
         if(mTimer!=null) mTimer!!.cancel()
+        if(orientationListener!=null) orientationListener!!.disable()
         super.onDestroy()
     }
 }
