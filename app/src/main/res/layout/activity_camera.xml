@@ -27,14 +27,6 @@
         android:layout_alignParentBottom="true"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <ImageButton
-            android:id="@+id/btnTakePic"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:layout_centerInParent="true"
-            android:background="@drawable/shape_white_ring"
-            android:src="@drawable/select_circle"
-            android:visibility="gone" />
 
         <ImageView
             android:id="@+id/btnStart"

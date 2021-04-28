@@ -43,7 +43,6 @@ import okhttp3.Response;
 public class Helper {
 
     Handler handler = new Handler();
-//    MyApplication myApplication = new MyApplication();
 
     public void getPrediction(File file, ImageView imageView, String ssh) throws IOException {
         OkHttpClient client = new OkHttpClient().newBuilder()
@@ -72,22 +71,13 @@ public class Helper {
                     System.out.println("------success");
                     InputStream is = response.body().byteStream();
                     Bitmap bitmap = BitmapFactory.decodeStream(is);
-//                    Matrix matrix = new Matrix();
-//                    matrix.postRotate(90f);
-//                    Bitmap nbmp2 = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
                     is.close();
                     Integer leftVolumn = Integer.valueOf(response.header("Left-Volumn"));
                     Integer rightVolumn = Integer.valueOf(response.header("Right-Volumn"));
                     Integer level = Integer.valueOf(response.header("Depth-Level"));
-//                    myApplication.setLeftVolumn(leftVolumn);
-//                    myApplication.setRightVolumn(rightVolumn);
-//                    myApplication.setLevel(level);
                     MyApplication.level = level;
                     MyApplication.leftVolumn = leftVolumn;
                     MyApplication.rightVolumn = rightVolumn;
-//                    System.out.println(myApplication.getLeftVolumn());
-//                    System.out.println(myApplication.getRightVolumn());
-//                    System.out.println(myApplication.getLevel());
                     handler.post(new Runnable() {
                         @Override
                         public void run() {

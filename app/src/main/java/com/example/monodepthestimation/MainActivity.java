@@ -50,18 +50,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         setContentView(R.layout.activity_main);
-        findViewById(R.id.detect).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                try {
-                    mCameraManager=(CameraManager)getSystemService(Context.CAMERA_SERVICE);
-                    mCameraCharacteristics = mCameraManager.getCameraCharacteristics(Integer.toString(mCameraId));
-                } catch (CameraAccessException e) {
-                    e.printStackTrace();
-                }
-                isHardwareSupported(mCameraCharacteristics);
-            }
-        });
         findViewById(R.id.camera).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -83,34 +71,5 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-        findViewById(R.id.sound).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, Sound.class);
-                startActivity(intent);
-            }
-        });
-    }
-    private int isHardwareSupported(CameraCharacteristics characteristics) {
-        Integer deviceLevel = characteristics.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL);
-        if (deviceLevel == null) {
-            System.out.println("----can not get INFO_SUPPORTED_HARDWARE_LEVEL");
-            return -1;
-        }
-        switch (deviceLevel) {
-            case CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_FULL:
-                System.out.println("----hardware supported level:LEVEL_FULL");
-                break;
-            case CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY:
-                System.out.println("----hardware supported level:LEVEL_LEGACY");
-                break;
-            case CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_3:
-                System.out.println("----hardware supported level:LEVEL_3");
-                break;
-            case CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED:
-                System.out.println("----hardware supported level:LEVEL_LIMITED");
-                break;
-        }
-        return deviceLevel;
     }
 }

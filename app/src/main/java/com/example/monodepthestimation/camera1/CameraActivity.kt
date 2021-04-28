@@ -16,16 +16,8 @@ import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import com.example.monodepthestimation.MyApplication
 import com.example.monodepthestimation.R
-import com.example.monodepthestimation.log
-import com.example.monodepthestimation.toast
-import com.example.monodepthestimation.util.BitmapUtils
-import com.example.monodepthestimation.util.FileUtil
 import kotlinx.android.synthetic.main.activity_camera.*
-import okio.buffer
-import okio.sink
 import java.util.*
-import kotlin.concurrent.thread
-
 
 /**
  * author :  chensen
@@ -39,10 +31,7 @@ class CameraActivity : AppCompatActivity() {
         const val TYPE_RECORD = 1
     }
 
-//    var application = MyApplication()
     private lateinit var mCameraHelper: CameraHelper
-//    private var mMediaRecorderHelper: MediaRecorderHelper? = null
-    var mHelper: Helper = Helper()
     var sp: SoundPool? = null
     var sounddata: HashMap<Int, Int>? = null
     var nowSound: Int? = null
@@ -85,44 +74,15 @@ class CameraActivity : AppCompatActivity() {
 //        val screenWidth = (screenHeight/4*3)
         val screenWidth = dm.widthPixels / 2
         val screenHeight = (screenWidth*2/3)
-        println(screenHeight)
         println(screenWidth)
+        println(screenHeight)
         surfaceView.layoutParams.height = screenHeight
         imageView.layoutParams.height = screenHeight
         surfaceView.layoutParams.width = screenWidth
         imageView.layoutParams.width = screenWidth
 
         mCameraHelper = CameraHelper(this, surfaceView, imageView, ssh)
-        mCameraHelper.addCallBack(object : CameraHelper.CallBack {
-//            override fun onFaceDetect(faces: ArrayList<RectF>) {
-//                faceView.setFaces(faces)
-//            }
 
-            override fun onTakePic(data: ByteArray?) {
-                savePic(data)
-                btnTakePic.isClickable = true
-            }
-
-//            override fun onPreviewFrame(data: ByteArray?) {
-//                if (!lock) {
-//                    mCameraHelper.getCamera()?.let {
-//                        mMediaRecorderHelper = MediaRecorderHelper(this@CameraActivity, mCameraHelper.getCamera()!!, mCameraHelper.mDisplayOrientation, mCameraHelper.mSurfaceHolder.surface)
-//                    }
-//                    lock = true
-//                }
-//            }
-        })
-
-        if (intent.getIntExtra(TYPE_TAG, 0) == TYPE_RECORD) { //录视频
-            btnTakePic.visibility = View.GONE
-            btnStart.visibility = View.VISIBLE
-        }
-
-        btnTakePic.setOnClickListener {
-//            mCameraHelper.takePic()
-//            val timer = Timer()
-//            timer.schedule(timerTask { mCameraHelper.takePic() }, 0,2000)
-        }
         ivExchange.setOnClickListener { mCameraHelper.exchangeCamera() }
 
         btnStart.setOnClickListener {
@@ -130,7 +90,6 @@ class CameraActivity : AppCompatActivity() {
             btnStop.visibility = View.VISIBLE
             mCameraHelper.startGetPreviewImage()
             startTimer()
-
         }
         btnStop.setOnClickListener {
             btnStart.visibility = View.VISIBLE
@@ -194,43 +153,9 @@ class CameraActivity : AppCompatActivity() {
     }
 
 
-
-    fun savePic(data: ByteArray?) {
-        thread {
-            try {
-                val temp = System.currentTimeMillis()
-                val picFile = FileUtil.createCameraFile()
-                if (picFile != null && data != null) {
-                    val rawBitmap = BitmapFactory.decodeByteArray(data, 0, data.size)
-                    val resultBitmap = if (mCameraHelper.mCameraFacing == Camera.CameraInfo.CAMERA_FACING_FRONT)
-                        BitmapUtils.mirror(BitmapUtils.rotate(rawBitmap, 270f))
-                    else
-                        BitmapUtils.rotate(rawBitmap, 0f)
-                    picFile.sink().buffer().write(BitmapUtils.toByteArray(resultBitmap)).close()
-                    runOnUiThread {
-                        log("图片已保存! 耗时：${System.currentTimeMillis() - temp}    路径：  ${picFile.absolutePath}")
-                    }
-//                    println(picFile?.absolutePath)
-//                    mHelper.getPrediction(picFile, imageView)
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                runOnUiThread {
-                    toast("保存图片失败！")
-                }
-            }
-        }
-    }
-
     override fun onDestroy() {
         mCameraHelper.releaseCamera()
-//        mMediaRecorderHelper?.let {
-//            if (it.isRunning)
-//                it.stopRecord()
-//            it.release()
-//        }
+        if(mTimer!=null) mTimer!!.cancel()
         super.onDestroy()
     }
-
-
 }

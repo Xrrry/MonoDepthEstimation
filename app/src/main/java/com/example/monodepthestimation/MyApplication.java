@@ -13,9 +13,4 @@ public class MyApplication extends Application {
     public static Integer leftVolumn = 10;
     public static Integer rightVolumn = 10;
     public static Integer level = 0;
-//    private static String time = "";
-//    private static Boolean has = false;
-//    private static Integer leftVolumn = 10;
-//    private static Integer rightVolumn = 10;
-//    private static Integer level = 3;
 }

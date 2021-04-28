@@ -25,10 +25,9 @@ import kotlin.concurrent.thread
  * data  :  2018/3/17
  * desc :
  */
-//: Camera.PreviewCallback
+
 class CameraHelper(activity: Activity, surfaceView: SurfaceView, imageView: ImageView, ssh: String) {
 
-    var application = MyApplication()
     private var mCamera: Camera? = null                   //Camera对象
     private lateinit var mParameters: Camera.Parameters   //Camera对象的参数
     private var mSurfaceView: SurfaceView = surfaceView   //用于预览的SurfaceView对象
@@ -38,7 +37,6 @@ class CameraHelper(activity: Activity, surfaceView: SurfaceView, imageView: Imag
     var sssh: String = ssh
 
     private var mActivity: Activity = activity
-    private var mCallBack: CallBack? = null   //自定义的回调
 
     var mCameraFacing = Camera.CameraInfo.CAMERA_FACING_BACK  //摄像头方向
     var mDisplayOrientation: Int = 0    //预览旋转的角度
@@ -46,18 +44,6 @@ class CameraHelper(activity: Activity, surfaceView: SurfaceView, imageView: Imag
     private var picWidth = 600        //保存图片的宽
     private var picHeight = 800       //保存图片的高
 
-//    override fun onPreviewFrame(data: ByteArray?, camera: Camera?) {
-//        mCallBack?.onPreviewFrame(data)
-//    }
-
-    fun takePic() {
-        mCamera?.let {
-            it.takePicture({}, null, { data, _ ->
-                it.startPreview()
-                mCallBack?.onTakePic(data)
-            })
-        }
-    }
 
     private fun init() {
         mSurfaceHolder.addCallback(object : SurfaceHolder.Callback {
@@ -103,12 +89,12 @@ class CameraHelper(activity: Activity, surfaceView: SurfaceView, imageView: Imag
 
             //获取与指定宽高相等或最接近的尺寸
             //设置预览尺寸
-            val bestPreviewSize = getBestSize(mSurfaceView.width*2, mSurfaceView.height*2, mParameters.supportedPreviewSizes)
+            val bestPreviewSize = getBestSize(mSurfaceView.width, mSurfaceView.height, mParameters.supportedPreviewSizes)
             bestPreviewSize?.let {
-                mParameters.setPreviewSize(it.height, it.width)
+                mParameters.setPreviewSize(it.width, it.height)
             }
             //设置保存图片尺寸
-            val bestPicSize = getBestSize(picWidth, picHeight, mParameters.supportedPictureSizes)
+            val bestPicSize = getBestSize(mimageView.width, mimageView.height, mParameters.supportedPictureSizes)
             bestPicSize?.let {
                 mParameters.setPictureSize(it.width, it.height)
             }
@@ -125,7 +111,7 @@ class CameraHelper(activity: Activity, surfaceView: SurfaceView, imageView: Imag
     //获取与指定宽高相等或最接近的尺寸
     private fun getBestSize(targetWidth: Int, targetHeight: Int, sizeList: List<Camera.Size>): Camera.Size? {
         var bestSize: Camera.Size? = null
-        val targetRatio = (targetHeight.toDouble() / targetWidth)  //目标大小的宽高比
+        val targetRatio = (targetWidth.toDouble() / targetHeight)  //目标大小的宽高比
         var minDiff = targetRatio
 
         for (size in sizeList) {
@@ -134,7 +120,7 @@ class CameraHelper(activity: Activity, surfaceView: SurfaceView, imageView: Imag
         }
 
         for (size in sizeList) {
-            if (size.width == targetHeight && size.height == targetWidth) {
+            if (size.width == targetWidth && size.height == targetHeight) {
                 bestSize = size
                 break
             }
@@ -146,7 +132,7 @@ class CameraHelper(activity: Activity, surfaceView: SurfaceView, imageView: Imag
             }
         }
         log("目标尺寸 ：$targetWidth * $targetHeight ，   比例  $targetRatio")
-        log("最优尺寸 ：${bestSize?.height} * ${bestSize?.width}")
+        log("最优尺寸 ：${bestSize?.width} * ${bestSize?.height}")
         return bestSize
     }
 
@@ -156,7 +142,6 @@ class CameraHelper(activity: Activity, surfaceView: SurfaceView, imageView: Imag
             it.setPreviewDisplay(mSurfaceHolder)
             setCameraDisplayOrientation(mActivity)
             it.startPreview()
-//            startGetPreviewImage()
         }
     }
 
@@ -189,11 +174,6 @@ class CameraHelper(activity: Activity, surfaceView: SurfaceView, imageView: Imag
                         rotateMyBitmap(bmp)
                         stream.close()
                     }
-//                    val stream = ByteArrayOutputStream()
-//                    image.compressToJpeg(Rect(0, 0, size.width, size.height), 80, stream)
-//                    val bmp = BitmapFactory.decodeByteArray(stream.toByteArray(), 0, stream.size())
-//                    rotateMyBitmap(bmp)
-//                    stream.close()
                 }
             } catch (ex: java.lang.Exception) {
                 Log.e("Sys", "Error:" + ex.message)
@@ -201,11 +181,9 @@ class CameraHelper(activity: Activity, surfaceView: SurfaceView, imageView: Imag
         }
     }
 
-
     fun stopGetPreviewImage() {
         mCamera!!.stopPreview()
     }
-
 
     private fun rotateMyBitmap(bmp: Bitmap) {
         //*****旋转一下
@@ -213,23 +191,7 @@ class CameraHelper(activity: Activity, surfaceView: SurfaceView, imageView: Imag
         matrix.postRotate(0f)
         val bitmap = Bitmap.createBitmap(bmp.width, bmp.height, Bitmap.Config.ARGB_8888)
         val nbmp2 = Bitmap.createBitmap(bmp, 0, 0, bmp.width, bmp.height, matrix, true)
-//        mimageView.setImageBitmap(nbmp2)
         savePreviewPic(nbmp2, mimageView)
-//        var time = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
-//        var miTime = SimpleDateFormat("SSS").format(Date()).substring(0, 1).toInt()
-//        var lastTime = application.time
-//        var has = application.has
-//        if(time!=lastTime) {
-//            println("$lastTime  $time  $miTime")
-//            application.time = time
-//            application.has = false
-//            savePreviewPic(nbmp2, mimageView)
-//        }
-//        else if(miTime>=5&&!has) {
-//            println("$lastTime  $time  $miTime")
-//            application.has = true
-//            savePreviewPic(nbmp2, mimageView)
-//        }
     }
 
     private fun savePreviewPic(data: Bitmap, mimageView: ImageView) {
@@ -244,8 +206,6 @@ class CameraHelper(activity: Activity, surfaceView: SurfaceView, imageView: Imag
             }
         }
     }
-
-
 
     //判断是否支持某一对焦模式
     private fun isSupportFocus(focusMode: String): Boolean {
@@ -281,8 +241,6 @@ class CameraHelper(activity: Activity, surfaceView: SurfaceView, imageView: Imag
             mCamera = null
         }
     }
-
-
 
     //设置预览旋转的角度
     private fun setCameraDisplayOrientation(activity: Activity) {
@@ -325,17 +283,6 @@ class CameraHelper(activity: Activity, surfaceView: SurfaceView, imageView: Imag
         Toast.makeText(mActivity, msg, Toast.LENGTH_SHORT).show()
     }
 
-    fun getCamera(): Camera? = mCamera
-
-    fun addCallBack(callBack: CallBack) {
-        this.mCallBack = callBack
-    }
-
-    interface CallBack {
-//        fun onPreviewFrame(data: ByteArray?)
-        fun onTakePic(data: ByteArray?)
-//        fun onFaceDetect(faces: ArrayList<RectF>)
-    }
 
     init {
         mSurfaceHolder = mSurfaceView.holder
