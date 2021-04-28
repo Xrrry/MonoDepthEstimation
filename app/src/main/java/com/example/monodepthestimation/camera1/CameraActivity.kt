@@ -147,6 +147,7 @@ class CameraActivity : AppCompatActivity() {
         sounddata!!.put(1, sp!!.load(this, R.raw.sine_tone_600hz_05s, 1))
         sounddata!!.put(2, sp!!.load(this, R.raw.sine_tone_600hz_025s, 1))
         sounddata!!.put(3, sp!!.load(this, R.raw.sine_tone_600hz_0125s, 1))
+        sounddata!!.put(4, sp!!.load(this, R.raw.sine_tone_600hz_1s, 1))
     }
 
     fun playSound(sound: Int, number: Int, leftVolumn: Int, rightVolumn: Int) {
@@ -181,7 +182,7 @@ class CameraActivity : AppCompatActivity() {
                             sp!!.stop(nowSound!!)
                         }
                         if(MyApplication.level!=0) {
-                            playSound(MyApplication.level, 3, MyApplication.leftVolumn, MyApplication.rightVolumn)
+                            playSound(MyApplication.level, 0, MyApplication.leftVolumn, MyApplication.rightVolumn)
                         }
                     } catch (e: Exception) {
                         e.printStackTrace()

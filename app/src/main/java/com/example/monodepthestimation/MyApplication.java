@@ -12,7 +12,7 @@ public class MyApplication extends Application {
     public static Boolean has = false;
     public static Integer leftVolumn = 10;
     public static Integer rightVolumn = 10;
-    public static Integer level = 3;
+    public static Integer level = 0;
 //    private static String time = "";
 //    private static Boolean has = false;
 //    private static Integer leftVolumn = 10;
