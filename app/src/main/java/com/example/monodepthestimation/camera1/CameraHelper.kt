@@ -20,11 +20,6 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.concurrent.thread
 
-/**
- * author :  chensen
- * data  :  2018/3/17
- * desc :
- */
 
 class CameraHelper(activity: Activity, surfaceView: SurfaceView, imageView: ImageView, ssh: String) {
 
@@ -32,17 +27,14 @@ class CameraHelper(activity: Activity, surfaceView: SurfaceView, imageView: Imag
     private lateinit var mParameters: Camera.Parameters   //Camera对象的参数
     private var mSurfaceView: SurfaceView = surfaceView   //用于预览的SurfaceView对象
     private var mimageView: ImageView = imageView
-    var mSurfaceHolder: SurfaceHolder                     //SurfaceHolder对象
-    var mHelper: Helper = Helper()
-    var sssh: String = ssh
+    private var mSurfaceHolder: SurfaceHolder                     //SurfaceHolder对象
+    private var mHelper: Helper = Helper()
+    private var sssh: String = ssh
 
     private var mActivity: Activity = activity
 
-    var mCameraFacing = Camera.CameraInfo.CAMERA_FACING_BACK  //摄像头方向
-    var mDisplayOrientation: Int = 0    //预览旋转的角度
-
-    private var picWidth = 600        //保存图片的宽
-    private var picHeight = 800       //保存图片的高
+    private var mCameraFacing = Camera.CameraInfo.CAMERA_FACING_BACK  //摄像头方向
+    private var mDisplayOrientation: Int = 0    //预览旋转的角度
 
 
     private fun init() {

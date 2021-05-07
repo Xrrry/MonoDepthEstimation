@@ -1,36 +1,13 @@
 package com.example.monodepthestimation.camera1;
 
-
-import android.app.Application;
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
-import android.media.AudioManager;
-import android.media.SoundPool;
 import android.os.Handler;
 import android.widget.ImageView;
-import android.widget.Toast;
-
 import com.example.monodepthestimation.MyApplication;
-import com.example.monodepthestimation.R;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.SecureRandom;
-import java.security.cert.X509Certificate;
-import java.util.HashMap;
-import java.util.List;
-
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.MediaType;
@@ -93,6 +70,5 @@ public class Helper {
             }
         });
     }
-
 
 }
