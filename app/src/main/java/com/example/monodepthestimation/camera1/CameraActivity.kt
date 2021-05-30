@@ -35,6 +35,8 @@ class CameraActivity : AppCompatActivity(),SensorEventListener {
     private var mTimer: Timer? = null
     private var mTimerTask: TimerTask? = null
     private var sensorManager: SensorManager? = null
+    private var onShot: Boolean = false
+    private var hasStop: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -83,14 +85,21 @@ class CameraActivity : AppCompatActivity(),SensorEventListener {
         btnStart.setOnClickListener {
             btnStart.visibility = View.GONE
             btnStop.visibility = View.VISIBLE
+            if(hasStop) mCameraHelper.startPreview()
             mCameraHelper.startGetPreviewImage()
             startTimer()
+            onShot = true
         }
         btnStop.setOnClickListener {
             btnStart.visibility = View.VISIBLE
             btnStop.visibility = View.GONE
             mCameraHelper.stopGetPreviewImage()
             mTimer!!.cancel()
+            mTimer = null
+            mTimerTask!!.cancel()
+            mTimerTask = null
+            onShot = false
+            hasStop = true
         }
         InitSound()
         // 获得SensorManager对象
@@ -171,6 +180,9 @@ class CameraActivity : AppCompatActivity(),SensorEventListener {
     override fun onDestroy() {
         mCameraHelper.releaseCamera()
         if(mTimer!=null) mTimer!!.cancel()
+        mTimer = null
+        if(mTimerTask!=null) mTimerTask!!.cancel()
+        mTimerTask = null
         sensorManager!!.unregisterListener(this)
         super.onDestroy()
     }
@@ -180,7 +192,7 @@ class CameraActivity : AppCompatActivity(),SensorEventListener {
         // 通过getType方法获得当前传回数据的传感器类型
         if (sensorEvent!!.sensor.getType() == Sensor.TYPE_ACCELEROMETER) { // 处理加速度传感器传回的数据
             var now = Date().seconds
-            if((sensorEvent.values.get(0)<7) && isLegal(now, warnTime)) {
+            if((sensorEvent.values.get(0)<7) && isLegal(now, warnTime) && onShot) {
                 println("play warn")
                 println(warnTime)
                 println(now)

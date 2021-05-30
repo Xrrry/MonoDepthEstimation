@@ -147,23 +147,40 @@ class CameraHelper(activity: Activity, surfaceView: SurfaceView, imageView: Imag
                     var miTime = SimpleDateFormat("SSS").format(Date()).substring(0, 1).toInt()
                     var lastTime = MyApplication.time
                     var has = MyApplication.has
-                    if(time!=lastTime) {
+//                    if(time!=lastTime) {
+//                        println("$lastTime  $time  $miTime")
+//                        MyApplication.time = time
+//                        MyApplication.has = false
+//                        val stream = ByteArrayOutputStream()
+//                        image.compressToJpeg(Rect(0, 0, size.width, size.height), 80, stream)
+//                        val bmp = BitmapFactory.decodeByteArray(stream.toByteArray(), 0, stream.size())
+////                        rotateMyBitmap(bmp)
+//                        savePreviewPic(bmp, mimageView)
+//                        stream.close()
+//                    }
+//                    else if(miTime>=5&&!has) {
+//                        println("$lastTime  $time  $miTime")
+//                        MyApplication.has = true
+//                        val stream = ByteArrayOutputStream()
+//                        image.compressToJpeg(Rect(0, 0, size.width, size.height), 80, stream)
+//                        val bmp = BitmapFactory.decodeByteArray(stream.toByteArray(), 0, stream.size())
+////                        rotateMyBitmap(bmp)
+//                        savePreviewPic(bmp, mimageView)
+//                        stream.close()
+//                    }
+                    if(time!=lastTime || (miTime>=5&&!has)) {
                         println("$lastTime  $time  $miTime")
-                        MyApplication.time = time
-                        MyApplication.has = false
+                        if(time!=lastTime) {
+                            MyApplication.time = time
+                            MyApplication.has = false
+                        }
+                        else if(miTime>=5&&!has) {
+                            MyApplication.has = true
+                        }
                         val stream = ByteArrayOutputStream()
                         image.compressToJpeg(Rect(0, 0, size.width, size.height), 80, stream)
                         val bmp = BitmapFactory.decodeByteArray(stream.toByteArray(), 0, stream.size())
-                        rotateMyBitmap(bmp)
-                        stream.close()
-                    }
-                    else if(miTime>=5&&!has) {
-                        println("$lastTime  $time  $miTime")
-                        MyApplication.has = true
-                        val stream = ByteArrayOutputStream()
-                        image.compressToJpeg(Rect(0, 0, size.width, size.height), 80, stream)
-                        val bmp = BitmapFactory.decodeByteArray(stream.toByteArray(), 0, stream.size())
-                        rotateMyBitmap(bmp)
+                        savePreviewPic(bmp, mimageView)
                         stream.close()
                     }
                 }
@@ -181,7 +198,7 @@ class CameraHelper(activity: Activity, surfaceView: SurfaceView, imageView: Imag
         //*****旋转一下
         val matrix = Matrix()
         matrix.postRotate(0f)
-        val bitmap = Bitmap.createBitmap(bmp.width, bmp.height, Bitmap.Config.ARGB_8888)
+//        val bitmap = Bitmap.createBitmap(bmp.width, bmp.height, Bitmap.Config.ARGB_8888)
         val nbmp2 = Bitmap.createBitmap(bmp, 0, 0, bmp.width, bmp.height, matrix, true)
         savePreviewPic(nbmp2, mimageView)
     }
